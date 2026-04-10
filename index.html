@@ -711,11 +711,14 @@ textarea{line-height:1.6;min-height:70px}
     <div class="flabel">AI 모델</div>
     <select id="cfg-ai" onchange="markDirty()">
       <option value="ollama">Ollama 로컬 (무료, 제한 없음)</option>
+      <option value="gemini">Google Gemini (무료)</option>
       <option value="claude">Claude API</option>
       <option value="openai">OpenAI API</option>
     </select>
     <div class="flabel">Ollama 모델명</div>
     <input type="text" id="cfg-ollama" value="exaone3.5:7.8b" onchange="markDirty()">
+    <div class="flabel">Google Gemini API 키</div>
+    <input type="text" id="cfg-gemini" placeholder="AIza..." onchange="markDirty()">
     <div class="flabel">Claude API 키</div>
     <input type="text" id="cfg-claude" placeholder="sk-ant-..." onchange="markDirty()">
     <div class="flabel">OpenAI API 키</div>
@@ -766,7 +769,7 @@ textarea{line-height:1.6;min-height:70px}
 let DB = {
   haeyoung:{}, hyunsoo:{},
   lives:[], memories:[], album:[], logs:[],
-  settings:{theme:'dark',ai:'ollama',ollamaModel:'exaone3.5:7.8b',claudeKey:'',openaiKey:''}
+  settings:{theme:'dark',ai:'ollama',ollamaModel:'exaone3.5:7.8b',geminiKey:'',claudeKey:'',openaiKey:''}
 };
 let dirty = false;
 let memEditIdx = -1;
@@ -14711,6 +14714,7 @@ function collectData(){
     theme:DB.settings.theme,
     ai:document.getElementById('cfg-ai')?.value||'ollama',
     ollamaModel:fv('cfg-ollama'),
+    geminiKey:fv('cfg-gemini'),
     claudeKey:fv('cfg-claude'),
     openaiKey:fv('cfg-openai'),
   };
@@ -14817,6 +14821,7 @@ function applyCfg(){
   const s=DB.settings||{};
   const el=document.getElementById('cfg-ai');if(el)el.value=s.ai||'ollama';
   const om=document.getElementById('cfg-ollama');if(om)om.value=s.ollamaModel||'exaone3.5:7.8b';
+  const gk=document.getElementById('cfg-gemini');if(gk)gk.value=s.geminiKey||'';
   const ck=document.getElementById('cfg-claude');if(ck)ck.value=s.claudeKey||'';
   const ok=document.getElementById('cfg-openai');if(ok)ok.value=s.openaiKey||'';
 }
