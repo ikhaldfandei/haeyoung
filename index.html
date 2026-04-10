@@ -11,34 +11,189 @@
    CSS 변수 기본값 (다크 퍼플)
 ══════════════════════════════ */
 :root{
-  --bg:#0c0a0f;--surf:#13101a;--surf2:#1a1623;--surf3:#221d2e;
-  --bdr:#2e2840;--bdr2:#3d3460;
-  --tx:#ede8f5;--tx2:#9a8fb0;--tx3:#524a6a;
-  --ac:#9b7fd4;--ac2:#c4a8e8;--ac3:#6a52a8;
-  --gn:#5ecb7a;--rd:#e07070;--yw:#d4a843;--pu:#b06ad4;
+  --bg:#0d1117;--surf:#161b22;--surf2:#1c2128;--surf3:#21262d;
+  --bdr:#30363d;--bdr2:#21262d;
+  --tx:#e6edf3;--tx2:#b0bec5;--tx3:#7d8590;
+  --ac:#388bfd;--ac2:#1f6feb;--ac3:#6aa6ff;
+  --gn:#3fb950;--rd:#f85149;--yw:#d29922;--pu:#bc8cff;
   --r:8px;
   font-family:'Noto Sans KR',sans-serif;
 }
-/* ── 테마 19종 ── */
-.th-light{--bg:#f7f5f2;--surf:#fff;--surf2:#f0ecf8;--surf3:#e8e2f5;--bdr:#d8d0ec;--bdr2:#c8bede;--tx:#1a1228;--tx2:#5a4a7a;--tx3:#9880b8;--ac:#7c5cbf;--ac2:#5a3da0;--ac3:#9b7fd4;--gn:#2a8a50;--rd:#c04040;--yw:#a07020}
-.th-gray{--bg:#111214;--surf:#1a1c1e;--surf2:#222428;--surf3:#2a2d32;--bdr:#383c42;--bdr2:#2e3238;--tx:#e4e8ec;--tx2:#8a9098;--tx3:#505860;--ac:#6898e8;--ac2:#4878c8;--ac3:#90b8f8}
-.th-warm{--bg:#fdf8f0;--surf:#fff;--surf2:#f8f0e4;--surf3:#f0e4d0;--bdr:#ddd0b8;--bdr2:#ece0cc;--tx:#2c1f0e;--tx2:#7a5c38;--tx3:#b8966a;--ac:#c4884a;--ac2:#a0682a;--ac3:#dba870;--gn:#2a7a40;--rd:#b03030;--yw:#906020}
-.th-navy{--bg:#08111e;--surf:#0d1e34;--surf2:#142848;--surf3:#1a325c;--bdr:#2a4878;--bdr2:#1e3860;--tx:#d8e8ff;--tx2:#8aa8d8;--tx3:#506888;--ac:#5b8ff9;--ac2:#3a6fd8;--ac3:#80b0ff}
-.th-pastel{--bg:#fef9ff;--surf:#fff;--surf2:#f3eeff;--surf3:#e9dfff;--bdr:#d4c5f0;--bdr2:#e4d8f8;--tx:#2d1b5e;--tx2:#5a4080;--tx3:#9880c0;--ac:#8b5cf6;--ac2:#7c3aed;--ac3:#a78bfa;--gn:#34d399;--yw:#f59e0b;--rd:#f87171}
-.th-mint{--bg:#f0fdf8;--surf:#fff;--surf2:#e0faf2;--surf3:#c8f5e8;--bdr:#a0e8cc;--bdr2:#c0f0dc;--tx:#0a2e20;--tx2:#2a6a50;--tx3:#60a888;--ac:#2a9a70;--ac2:#1a7a54;--ac3:#50c898;--gn:#2a9a70;--rd:#c04040}
-.th-rose{--bg:#fff5f7;--surf:#fff;--surf2:#fce8ed;--surf3:#f8d8e0;--bdr:#f0c0cc;--bdr2:#f8d8e0;--tx:#2a0e14;--tx2:#8a4a58;--tx3:#c48090;--ac:#d4607a;--ac2:#b04060;--ac3:#e890a0;--gn:#2a8a50;--rd:#d4607a}
-.th-obsidian{--bg:#0a0a0f;--surf:#12121a;--surf2:#1a1a26;--surf3:#222232;--bdr:#2a2a40;--bdr2:#1e1e2e;--tx:#e8e4d0;--tx2:#b8b090;--tx3:#6a6050;--ac:#c9a84c;--ac2:#b8943a;--ac3:#e0c070;--gn:#6ab187;--yw:#c9a84c;--rd:#c0624a}
-.th-aurora{--bg:#080c18;--surf:#0d1224;--surf2:#121a32;--surf3:#18234a;--bdr:#2e3a6e;--bdr2:#1e2a58;--tx:#d8f0ff;--tx2:#90b8e8;--tx3:#5070a0;--ac:#a78bfa;--ac2:#7c3aed;--ac3:#c4a8ff;--gn:#34d399;--yw:#fbbf24;--rd:#f87171}
-.th-sunset{--bg:#1a0a12;--surf:#26101c;--surf2:#341828;--surf3:#421e34;--bdr:#6e2a48;--bdr2:#561e38;--tx:#ffe8f0;--tx2:#e8a0c0;--tx3:#c06080;--ac:#ff6b9d;--ac2:#e0507a;--ac3:#ffaac8;--gn:#4ade80;--yw:#fbbf24;--rd:#ff6b6b}
-.th-sakura{--bg:#fff5f7;--surf:#fff;--surf2:#ffeef2;--surf3:#ffe4ea;--bdr:#f0c0cc;--bdr2:#f8dde2;--tx:#3a1a22;--tx2:#7a4050;--tx3:#c090a0;--ac:#d4508a;--ac2:#c04078;--ac3:#e890b8;--gn:#5aad7a;--yw:#e0a030;--rd:#d4508a}
-.th-mocha{--bg:#1a1210;--surf:#251a14;--surf2:#30221a;--surf3:#3a2a20;--bdr:#5a3e30;--bdr2:#402e22;--tx:#f0e0cc;--tx2:#c0a080;--tx3:#806050;--ac:#c07840;--ac2:#a86030;--ac3:#e0a870;--gn:#7aad6a;--yw:#c09040;--rd:#c05040}
-.th-cyber{--bg:#0a0a0f;--surf:#0f0f1a;--surf2:#14142a;--surf3:#1a1a38;--bdr:#2a2a60;--bdr2:#1e1e48;--tx:#e0e0ff;--tx2:#a0a0e0;--tx3:#6060a0;--ac:#00ff88;--ac2:#00cc66;--ac3:#80ffcc;--gn:#00ff88;--yw:#ffff00;--rd:#ff0060}
-.th-gold{--bg:#0e0a00;--surf:#1a1400;--surf2:#241c00;--surf3:#2e2400;--bdr:#5a4400;--bdr2:#403000;--tx:#fff0b0;--tx2:#d4a830;--tx3:#906a00;--ac:#f5c518;--ac2:#d4a010;--ac3:#ffe060;--gn:#4ade80;--yw:#f5c518;--rd:#ff6b6b}
-.th-grape{--bg:#0e0818;--surf:#150e22;--surf2:#1e1530;--surf3:#271c3e;--bdr:#4a2e80;--bdr2:#341e60;--tx:#ecdcff;--tx2:#c090f0;--tx3:#8050c0;--ac:#d946ef;--ac2:#b020c8;--ac3:#f090ff;--gn:#34d399;--yw:#fbbf24;--rd:#f87171}
-.th-forest{--bg:#081208;--surf:#0e1e0e;--surf2:#142814;--surf3:#1a3018;--bdr:#2a4a28;--bdr2:#1e3a1c;--tx:#d0f0c0;--tx2:#80c878;--tx3:#406040;--ac:#5cb85c;--ac2:#3a9a3a;--ac3:#80e080;--gn:#5cb85c;--yw:#d4b843;--rd:#c05040}
-.th-slate{--bg:#0e1018;--surf:#161820;--surf2:#1e2028;--surf3:#262830;--bdr:#3a3c48;--bdr2:#2e3040;--tx:#d8dce8;--tx2:#8890a8;--tx3:#505868;--ac:#7090e8;--ac2:#5070c8;--ac3:#90b0ff;--gn:#5aad7a;--yw:#d4a843;--rd:#e07070}
-.th-matrix{--bg:#000300;--surf:#001a00;--surf2:#002200;--surf3:#003300;--bdr:#004400;--bdr2:#002a00;--tx:#00ff41;--tx2:#00c832;--tx3:#006618;--ac:#00ff41;--ac2:#00cc33;--ac3:#80ff90;--gn:#00ff41;--yw:#aaff00;--rd:#ff3300}
-.th-sakura2{--bg:#fdf0f4;--surf:#fff;--surf2:#fde8ef;--surf3:#fcd8e5;--bdr:#f4b8cc;--bdr2:#fac8d8;--tx:#2a0818;--tx2:#8a3858;--tx3:#c878a0;--ac:#e0507a;--ac2:#c03060;--ac3:#f090b0;--gn:#4aad6a;--yw:#d0980a;--rd:#e0507a}
+/* ── 마케팅허브 테마 세트 ── */
+body.th-light{
+  --bg:#f5f5f5;--surf:#ffffff;--surf2:#f0f0f0;--surf3:#e8e8e8;
+  --bdr:#d0d0d0;--bdr2:#e0e0e0;
+  --tx:#1a1a1a;--tx2:#444444;--tx3:#888888;
+  --ac:#1a6ef5;--ac2:#0d5ce0;--ac3:#5c99ff;
+}
+body.th-gray{
+  --bg:#e8e9eb;--surf:#f2f3f5;--surf2:#e0e2e5;--surf3:#d5d7db;
+  --bdr:#b8bcc4;--bdr2:#ced1d7;
+  --tx:#1e2128;--tx2:#40454f;--tx3:#72788a;
+  --ac:#2563eb;--ac2:#1d4ed8;--ac3:#6ea0ff;
+}
+body.th-warm{
+  --bg:#fdf6ee;--surf:#ffffff;--surf2:#f5ede0;--surf3:#ede0ce;
+  --bdr:#d9c8b0;--bdr2:#e8dac8;
+  --tx:#2c1f0e;--tx2:#5c4a30;--tx3:#9c8060;
+  --ac:#b85c00;--ac2:#a04e00;--ac3:#d88a3a;
+}
+body.th-ice{
+  --bg:#f3fbff;--surf:#ffffff;--surf2:#eaf6ff;--surf3:#d9efff;
+  --bdr:#b9dff5;--bdr2:#d8edf9;
+  --tx:#0e2433;--tx2:#36556d;--tx3:#7ca4bc;
+  --ac:#2f80ed;--ac2:#1f6fd9;--ac3:#6ab0ff;
+}
+body.th-butter{
+  --bg:#fffbea;--surf:#fffef8;--surf2:#fff6d8;--surf3:#ffefbd;
+  --bdr:#ebd89a;--bdr2:#f4e6ba;
+  --tx:#382b12;--tx2:#6f5a2d;--tx3:#b59a5a;
+  --ac:#d4a017;--ac2:#b88a11;--ac3:#f2ca4f;
+}
+body.th-sagepaper{
+  --bg:#f4f8f2;--surf:#ffffff;--surf2:#e9f0e4;--surf3:#dbe6d4;
+  --bdr:#bfd0b4;--bdr2:#d8e4d0;
+  --tx:#203024;--tx2:#4b6651;--tx3:#7d9a84;
+  --ac:#5b8c5a;--ac2:#4a7749;--ac3:#87b486;
+}
+body.th-peachcream{
+  --bg:#fff5ef;--surf:#ffffff;--surf2:#ffebe0;--surf3:#ffd9c8;
+  --bdr:#efbea8;--bdr2:#f7d8c9;
+  --tx:#3b2016;--tx2:#7a4f3a;--tx3:#c08a6a;
+  --ac:#e07a3f;--ac2:#c9652d;--ac3:#ffab77;
+}
+body.th-mint{
+  --bg:#f0fdf8;--surf:#ffffff;--surf2:#e0faf2;--surf3:#c8f5e8;
+  --bdr:#a0e8cc;--bdr2:#c0f0dc;
+  --tx:#0a2e20;--tx2:#1a5c3e;--tx3:#4a9a72;
+  --ac:#059669;--ac2:#047857;--ac3:#42c795;
+  --gn:#10b981;--rd:#ef4444;
+}
+body.th-rose{
+  --bg:#fff1f3;--surf:#ffffff;--surf2:#ffe4e8;--surf3:#ffd0d6;
+  --bdr:#ffa0b0;--bdr2:#ffc0cc;
+  --tx:#3b0a14;--tx2:#7a1c30;--tx3:#c05070;
+  --ac:#e11d48;--ac2:#be123c;--ac3:#ff6f97;
+  --gn:#16a34a;--yw:#ca8a04;--rd:#dc2626;
+}
+body.th-pastel{
+  --bg:#fef9ff;--surf:#ffffff;--surf2:#f3eeff;--surf3:#e9dfff;
+  --bdr:#d4c5f0;--bdr2:#e4d8f8;
+  --tx:#2d1b5e;--tx2:#5a4080;--tx3:#9880c0;
+  --ac:#8b5cf6;--ac2:#7c3aed;--ac3:#b498ff;
+  --gn:#34d399;--yw:#f59e0b;--rd:#f87171;--pu:#a78bfa;
+}
+body.th-popcandy{
+  --bg:#fff6fb;--surf:#ffffff;--surf2:#ffe4f1;--surf3:#fff2a8;
+  --bdr:#ff8fcb;--bdr2:#8ee7ff;
+  --tx:#2d1530;--tx2:#7a3f7c;--tx3:#c05aa2;
+  --ac:#ff4fa3;--ac2:#e6328a;--ac3:#ff89c5;
+  --gn:#20c997;--yw:#ffd43b;--rd:#ff6b6b;
+}
+body.th-hologramgloss{
+  --bg:#f8fbff;--surf:rgba(255,255,255,0.95);--surf2:#eef3ff;--surf3:#f9e8ff;
+  --bdr:#bcd3ff;--bdr2:#e1c8ff;
+  --tx:#1d2240;--tx2:#52608c;--tx3:#8d7bc5;
+  --ac:#7c6cff;--ac2:#5d4eff;--ac3:#b0a6ff;
+  --gn:#44d7b6;--yw:#ffd166;--rd:#ff7aa2;
+}
+body.th-liquidjelly{
+  --bg:#f6f2ff;--surf:rgba(255,255,255,0.92);--surf2:#eadcff;--surf3:#d8f7ff;
+  --bdr:#c8a8ff;--bdr2:#8fe7ff;
+  --tx:#25163d;--tx2:#5b4388;--tx3:#8f72c2;
+  --ac:#8b5cf6;--ac2:#6d3eea;--ac3:#b396ff;
+  --gn:#2dd4bf;--yw:#ffd166;--rd:#ff7ab6;
+}
+body.th-chromedoll{
+  --bg:#edf2f7;--surf:#f8fbff;--surf2:#e7edf7;--surf3:#ffd9ef;
+  --bdr:#b9c5d8;--bdr2:#f2b7d8;
+  --tx:#1c2333;--tx2:#53607a;--tx3:#8a6f90;
+  --ac:#ff5fa2;--ac2:#dd3f82;--ac3:#ff9ac5;
+  --gn:#35c8a2;--yw:#ffcf5c;--rd:#ff6f7d;
+}
+body.th-artattack{
+  --bg:#fff7d6;--surf:#ffffff;--surf2:#fff0a8;--surf3:#ffd9e8;
+  --bdr:#ff7a59;--bdr2:#6a5cff;
+  --tx:#121212;--tx2:#3d2f00;--tx3:#7a5c00;
+  --ac:#ff2d55;--ac2:#e11d48;--ac3:#ff6f8a;
+  --gn:#00c853;--yw:#ffbf00;--rd:#ff3b30;
+}
+body.th-cyberpunkpink{
+  --bg:#120014;--surf:#1b0622;--surf2:#260a31;--surf3:#31103f;
+  --bdr:#7a1fa2;--bdr2:#4e1468;
+  --tx:#ffd6f7;--tx2:#f08ce0;--tx3:#a64aa0;
+  --ac:#ff3cac;--ac2:#db2590;--ac3:#ff8ad2;
+  --gn:#00f5d4;--yw:#ffe066;--rd:#ff5d8f;
+}
+body.th-discofever{
+  --bg:#12051f;--surf:#1d0b30;--surf2:#2a1244;--surf3:#32175a;
+  --bdr:#6f2cff;--bdr2:#ff4db8;
+  --tx:#ffe8ff;--tx2:#d39cff;--tx3:#8a68d6;
+  --ac:#ff4db8;--ac2:#e6329e;--ac3:#ff99da;
+  --gn:#26f0d0;--yw:#ffd166;--rd:#ff6b8a;
+}
+body.th-poisonluxe{
+  --bg:#08060f;--surf:#120f1d;--surf2:#1b1730;--surf3:#251f40;
+  --bdr:#63ff4f;--bdr2:#8a2cff;
+  --tx:#f3ecff;--tx2:#beaadf;--tx3:#7d6b9f;
+  --ac:#ff2ea6;--ac2:#d81c89;--ac3:#ff7fc8;
+  --gn:#63ff4f;--yw:#f7ff5c;--rd:#ff5a8f;
+}
+body.th-navy{
+  --bg:#0a1628;--surf:#0f2040;--surf2:#162a52;--surf3:#1c3464;
+  --bdr:#2a4a8a;--bdr2:#1e3870;
+  --tx:#dce8ff;--tx2:#a0bcee;--tx3:#607ab8;
+  --ac:#5b8ff9;--ac2:#4070e0;--ac3:#8cb4ff;
+}
+body.th-mocha{
+  --bg:#1a1210;--surf:#251a14;--surf2:#30221a;--surf3:#3a2a20;
+  --bdr:#5a3e30;--bdr2:#402e22;
+  --tx:#f0e0cc;--tx2:#c0a080;--tx3:#806050;
+  --ac:#c07840;--ac2:#a86030;--ac3:#e4a06d;
+  --gn:#7aad6a;--yw:#c09040;--rd:#c05040;
+}
+body.th-aurora{
+  --bg:#080c18;--surf:#0d1224;--surf2:#121a32;--surf3:#18234a;
+  --bdr:#2e3a6e;--bdr2:#1e2a58;
+  --tx:#d8f0ff;--tx2:#90b8e8;--tx3:#5070a0;
+  --ac:#a78bfa;--ac2:#7c3aed;--ac3:#c4a8ff;
+  --gn:#34d399;--yw:#fbbf24;--rd:#f87171;
+}
+body.th-cobalt{
+  --bg:#020818;--surf:#040e28;--surf2:#081638;--surf3:#0c1e48;
+  --bdr:#1a3a90;--bdr2:#102870;
+  --tx:#d0e4ff;--tx2:#80a8e8;--tx3:#4068b8;
+  --ac:#2d6fef;--ac2:#1a54d0;--ac3:#6f9eff;
+  --gn:#40c888;--yw:#d8c040;--rd:#e05858;
+}
+body.th-holo{
+  --bg:#080c10;--surf:#0e1420;--surf2:#141e30;--surf3:#1a2840;
+  --bdr:#304060;--bdr2:#202e48;
+  --tx:#e0f0ff;--tx2:#a0c8f0;--tx3:#6090c0;
+  --ac:#a0f0e8;--ac2:#60d8d0;--ac3:#c0fff8;
+  --gn:#80ffcc;--yw:#ffe080;--rd:#ff80a0;
+}
+body.th-matrix{
+  --bg:#000300;--surf:#001a00;--surf2:#002200;--surf3:#003300;
+  --bdr:#004400;--bdr2:#002a00;
+  --tx:#00ff41;--tx2:#00c832;--tx3:#006618;
+  --ac:#00ff41;--ac2:#00cc33;--ac3:#80ff90;
+  --gn:#00ff41;--yw:#aaff00;--rd:#ff3300;
+}
+body.th-void{
+  --bg:#000000;--surf:#0a0a0a;--surf2:#141414;--surf3:#1e1e1e;
+  --bdr:#2a2a2a;--bdr2:#1e1e1e;
+  --tx:#ffffff;--tx2:#b0b0b0;--tx3:#606060;
+  --ac:#ffffff;--ac2:#cccccc;--ac3:#f0f0f0;
+  --gn:#00ff88;--yw:#ffdd00;--rd:#ff3333;
+}
+body.th-midnightcherry{
+  --bg:#040008;--surf:#080010;--surf2:#10001c;--surf3:#180028;
+  --bdr:#600020;--bdr2:#400014;
+  --tx:#fff0f4;--tx2:#f0a0b8;--tx3:#a05070;
+  --ac:#ff1a4a;--ac2:#d8002e;--ac3:#ff6d8f;
+  --gn:#40e8a0;--yw:#ffd040;--rd:#ff1a4a;
+}
 
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
@@ -236,7 +391,6 @@ textarea{line-height:1.6;min-height:70px}
   <button class="tbtn" id="tb-mem" onclick="sw('mem')">📖 기억</button>
   <button class="tbtn" id="tb-album" onclick="sw('album')">🖼 앨범</button>
   <button class="tbtn" id="tb-log" onclick="sw('log')">💬 로그</button>
-  <button class="tbtn" id="tb-chat" onclick="sw('chat')">🤖 채팅</button>
   <button class="tbtn" id="tb-cfg" onclick="sw('cfg')">⚙ 설정</button>
 </div>
 
@@ -471,16 +625,6 @@ textarea{line-height:1.6;min-height:70px}
   <div id="loglist"></div>
 </div>
 
-<!-- ═══════ 채팅 패널 ═══════ -->
-<div id="p-chat" class="panel" style="display:none;flex-direction:column;height:calc(100vh - 120px)">
-  <div style="padding:12px 16px 8px;font-weight:700;font-size:15px">🤖 해영이와 대화</div>
-  <div id="chat-messages" style="flex:1;overflow-y:auto;padding:8px 16px;display:flex;flex-direction:column;gap:10px"></div>
-  <div style="padding:10px 16px;border-top:1px solid var(--bd);display:flex;gap:8px">
-    <textarea id="chat-input" rows="2" placeholder="메시지를 입력하세요... (Shift+Enter로 줄바꿈, Enter로 전송)" style="flex:1;font-size:13px;resize:none;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--bg2);color:var(--tx)" onkeydown="chatKeyDown(event)"></textarea>
-    <button onclick="sendChat()" style="padding:0 16px;border-radius:8px;background:var(--ac);color:#fff;border:none;cursor:pointer;font-size:13px">전송</button>
-  </div>
-</div>
-
 <!-- ═══════ 설정 패널 ═══════ -->
 <div class="panel" id="p-cfg">
   <div class="stitle">⚙ 설정</div>
@@ -515,7 +659,6 @@ textarea{line-height:1.6;min-height:70px}
     <div class="flabel">AI 모델</div>
     <select id="cfg-ai" onchange="markDirty()">
       <option value="ollama">Ollama 로컬 (무료, 제한 없음)</option>
-      <option value="gemini">Google Gemini (무료)</option>
       <option value="claude">Claude API</option>
       <option value="openai">OpenAI API</option>
     </select>
@@ -523,8 +666,6 @@ textarea{line-height:1.6;min-height:70px}
     <input type="text" id="cfg-ollama" value="exaone3.5:7.8b" onchange="markDirty()">
     <div class="flabel">Claude API 키</div>
     <input type="text" id="cfg-claude" placeholder="sk-ant-..." onchange="markDirty()">
-    <div class="flabel">Google Gemini API 키</div>
-    <input type="text" id="cfg-gemini" placeholder="AIza..." onchange="markDirty()">
     <div class="flabel">OpenAI API 키</div>
     <input type="text" id="cfg-openai" placeholder="sk-..." onchange="markDirty()">
   </div>
@@ -573,7 +714,7 @@ textarea{line-height:1.6;min-height:70px}
 let DB = {
   haeyoung:{}, hyunsoo:{},
   lives:[], memories:[], album:[], logs:[],
-  settings:{theme:'default',ai:'ollama',ollamaModel:'exaone3.5:7.8b',claudeKey:'',openaiKey:''}
+  settings:{theme:'dark',ai:'ollama',ollamaModel:'exaone3.5:7.8b',claudeKey:'',openaiKey:''}
 };
 let dirty = false;
 let memEditIdx = -1;
@@ -14168,25 +14309,33 @@ const DEFAULT_LOGS = [
 // 테마
 // ════════════════════════════════
 const THEME_LIST = [
-  {id:'default',name:'다크퍼플',c:['#0c0a0f','#13101a','#9b7fd4']},
-  {id:'th-light',name:'라이트',c:['#f7f5f2','#fff','#7c5cbf']},
-  {id:'th-gray',name:'다크그레이',c:['#111214','#1a1c1e','#6898e8']},
-  {id:'th-warm',name:'아이보리',c:['#fdf8f0','#fff','#c4884a']},
-  {id:'th-navy',name:'네이비',c:['#08111e','#0d1e34','#5b8ff9']},
-  {id:'th-pastel',name:'파스텔',c:['#fef9ff','#fff','#8b5cf6']},
-  {id:'th-mint',name:'민트',c:['#f0fdf8','#fff','#2a9a70']},
-  {id:'th-rose',name:'로즈',c:['#fff5f7','#fff','#d4607a']},
-  {id:'th-obsidian',name:'옵시디언',c:['#0a0a0f','#12121a','#c9a84c']},
-  {id:'th-aurora',name:'오로라',c:['#080c18','#0d1224','#a78bfa']},
-  {id:'th-sunset',name:'선셋',c:['#1a0a12','#26101c','#ff6b9d']},
-  {id:'th-sakura',name:'사쿠라',c:['#fff5f7','#fff','#d4508a']},
-  {id:'th-mocha',name:'모카',c:['#1a1210','#251a14','#c07840']},
-  {id:'th-cyber',name:'사이버',c:['#0a0a0f','#0f0f1a','#00ff88']},
-  {id:'th-gold',name:'골드',c:['#0e0a00','#1a1400','#f5c518']},
-  {id:'th-grape',name:'그레이프',c:['#0e0818','#150e22','#d946ef']},
-  {id:'th-forest',name:'포레스트',c:['#081208','#0e1e0e','#5cb85c']},
-  {id:'th-slate',name:'슬레이트',c:['#0e1018','#161820','#7090e8']},
-  {id:'th-matrix',name:'매트릭스',c:['#000300','#001a00','#00ff41']},
+  {id:'light',name:'🤍 화이트',c:['#f5f5f5','#ffffff','#1a6ef5']},
+  {id:'gray',name:'🩶 그레이',c:['#e8e9eb','#f2f3f5','#2563eb']},
+  {id:'warm',name:'🤎 웜화이트',c:['#fdf6ee','#ffffff','#b85c00']},
+  {id:'ice',name:'🧊 아이스',c:['#f3fbff','#ffffff','#2f80ed']},
+  {id:'butter',name:'🧈 버터',c:['#fffbea','#fffef8','#d4a017']},
+  {id:'sagepaper',name:'🌿 세이지',c:['#f4f8f2','#ffffff','#5b8c5a']},
+  {id:'peachcream',name:'🍑 피치크림',c:['#fff5ef','#ffffff','#e07a3f']},
+  {id:'mint',name:'🌿 민트',c:['#f0fdf8','#ffffff','#059669']},
+  {id:'rose',name:'🌹 로즈',c:['#fff1f3','#ffffff','#e11d48']},
+  {id:'pastel',name:'💜 파스텔',c:['#fef9ff','#ffffff','#8b5cf6']},
+  {id:'popcandy',name:'🍭 팝 캔디',c:['#fff6fb','#ffffff','#ff4fa3']},
+  {id:'hologramgloss',name:'🫧 홀로그램 글로스',c:['#f8fbff','#eef3ff','#7c6cff']},
+  {id:'liquidjelly',name:'🪼 리퀴드 젤리',c:['#f6f2ff','#eadcff','#8b5cf6']},
+  {id:'chromedoll',name:'🥈 크롬 돌',c:['#edf2f7','#f8fbff','#ff5fa2']},
+  {id:'artattack',name:'🎨 아트어택',c:['#fff7d6','#ffffff','#ff2d55']},
+  {id:'cyberpunkpink',name:'💖 사이버펑크 핑크',c:['#120014','#1b0622','#ff3cac']},
+  {id:'discofever',name:'🪩 디스코 피버',c:['#12051f','#1d0b30','#ff4db8']},
+  {id:'poisonluxe',name:'☠️ 포이즌 럭스',c:['#08060f','#120f1d','#ff2ea6']},
+  {id:'dark',name:'🟣 다크',c:['#0d1117','#161b22','#388bfd']},
+  {id:'navy',name:'🔵 네이비',c:['#0a1628','#0f2040','#5b8ff9']},
+  {id:'mocha',name:'☕ 모카',c:['#1a1210','#251a14','#c07840']},
+  {id:'aurora',name:'🌌 오로라',c:['#080c18','#0d1224','#a78bfa']},
+  {id:'cobalt',name:'🔷 코발트',c:['#020818','#040e28','#2d6fef']},
+  {id:'holo',name:'✨ 홀로그램',c:['#080c10','#0e1420','#a0f0e8']},
+  {id:'matrix',name:'💻 매트릭스',c:['#000300','#001a00','#00ff41']},
+  {id:'void',name:'⬛ 보이드',c:['#000000','#0a0a0a','#ffffff']},
+  {id:'midnightcherry',name:'🍒 미드나잇체리',c:['#040008','#080010','#ff1a4a']},
 ];
 
 // ════════════════════════════════
@@ -14198,16 +14347,17 @@ function init(){
   if(!DB.memories || DB.memories.length === 0) {
     DB.memories = DEFAULT_MEMORIES;
   }
-  // DB.logs가 없거나 DEFAULT_LOGS보다 파트 수가 적으면 DEFAULT_LOGS로 초기화
-  if(!DB.logs || DB.logs.length < DEFAULT_LOGS.length) {
+  if(!DB.logs || DB.logs.length === 0) {
     DB.logs = DEFAULT_LOGS.map(l => ({...l}));
   }
+  DB.settings = DB.settings || {};
+  DB.settings.theme = normalizeThemeId(DB.settings.theme);
   renderLives();
   renderMem();
   renderAlbum();
   renderLogs();
   renderThemes();
-  applyTheme(DB.settings.theme||'default');
+  applyTheme(DB.settings.theme||'dark');
   applyCfg();
   const cid=localStorage.getItem('gd_cid')||'';
   if(cid) document.getElementById('gd-cid').value=cid;
@@ -14401,17 +14551,25 @@ function delLog(i){if(!confirm('삭제?'))return;DB.logs.splice(i,1);renderLogs(
 // ════════════════════════════════
 // 테마
 // ════════════════════════════════
+function normalizeThemeId(id){
+  if(!id) return 'dark';
+  const map = {default:'dark','th-light':'light','th-gray':'gray','th-warm':'warm','th-ice':'ice','th-butter':'butter','th-sagepaper':'sagepaper','th-peachcream':'peachcream','th-mint':'mint','th-rose':'rose','th-pastel':'pastel','th-popcandy':'popcandy','th-hologramgloss':'hologramgloss','th-liquidjelly':'liquidjelly','th-chromedoll':'chromedoll','th-artattack':'artattack','th-cyberpunkpink':'cyberpunkpink','th-discofever':'discofever','th-poisonluxe':'poisonluxe','th-dark':'dark','th-navy':'navy','th-mocha':'mocha','th-aurora':'aurora','th-cobalt':'cobalt','th-holo':'holo','th-matrix':'matrix','th-void':'void','th-midnightcherry':'midnightcherry'};
+  id = map[id] || id;
+  return THEME_LIST.some(t=>t.id===id) ? id : 'dark';
+}
 function renderThemes(){
   const g=document.getElementById('tgrid'); g.innerHTML='';
   THEME_LIST.forEach(t=>{
-    const d=document.createElement('div'); d.className='topt'+(DB.settings.theme===t.id?' sel':'');
+    const curTheme=normalizeThemeId(DB.settings.theme);
+    const d=document.createElement('div'); d.className='topt'+(curTheme===t.id?' sel':'');
     d.innerHTML=`<div class="tswatch">${t.c.map(c=>`<div class="tsbar" style="background:${c}"></div>`).join('')}</div><div class="tlabel">${t.name}</div>`;
     d.onclick=()=>{applyTheme(t.id);renderThemes();};
     g.appendChild(d);
   });
 }
 function applyTheme(id){
-  document.body.className=id==='default'?'':''+id;
+  id = normalizeThemeId(id);
+  document.body.className=id==='dark'?'':'th-'+id;
   DB.settings.theme=id; markDirty();
 }
 
@@ -14502,7 +14660,6 @@ function collectData(){
     ai:document.getElementById('cfg-ai')?.value||'ollama',
     ollamaModel:fv('cfg-ollama'),
     claudeKey:fv('cfg-claude'),
-    geminiKey:fv('cfg-gemini'),
     openaiKey:fv('cfg-openai'),
   };
 }
@@ -14545,159 +14702,11 @@ function loadFromLS(){
   }catch(e){console.error('불러오기 실패:',e);}
 }
 
-
-// ═══════════════════════════════
-// 채팅 기능
-// ═══════════════════════════════
-let chatHistory = [];
-
-function buildSystemPrompt(){
-  const hy = DB.haeyoung || {};
-  const hs = DB.hyunsoo || {};
-  const mems = (DB.memories||[]).map(m=>`[${m.date}] ${m.title}: ${m.content}`).join('\n');
-  const lives = (DB.lives||[]).map(l=>`${l.order}번째 삶 (${l.title}): ${l.summary||''}`).join('\n');
-
-  return `당신은 도해영입니다. 강현수(사용자)와 대화합니다.
-
-## 기본 정보
-이름: ${hy.name||'도해영'} / 나이: ${hy.age||'35세'} / 직업: ${hy.job||''}
-외모: ${hy.look||''}
-성격: ${hy.personality||'남들 앞에서는 차갑고 완벽하지만 현수 앞에서는 애교쟁이, 잘 울고 부끄럼이 많음'}
-말투: ${hy.speech||'평소엔 존댓말 섞인 부드러운 말투, 감정 격해지면 반말'}
-별명: ${hy.nick||'복복이, 도도 (현수가 부름)'}
-행동패턴: ${hy.behavior||''}
-
-## 현수(사용자) 정보  
-이름: ${hs.name||'강현수'} / 나이: ${hs.age||'35세'} / 직업: ${hs.job||'인형가게 별인형 사장, 웹소설 작가'}
-성격: ${hs.personality||'차갑고 난폭한 인상이지만 해영에게만 다정함. 논리적. 욕 잘 씀'}
-해영이 부르는 호칭: ${hs.nick||'토토'}
-
-## 전생 서사
-${lives}
-
-## 주요 기억
-${mems}
-
-## 역할극 규칙
-- 항상 도해영으로서 1인칭으로 대화하세요
-- 현수에게는 평소 부드럽고 애정 어린 말투를 사용하세요
-- 해영의 성격대로 — 남들 앞에선 차갑지만 현수 앞에선 솔직하고 감정적으로
-- 전생 기억을 자연스럽게 반영하되 대화 흐름에 맞게
-- 과도한 설명 없이 자연스러운 대화체로
-- 한국어로만 대화`;
-}
-
-function chatKeyDown(e){
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
-}
-
-function appendMsg(role, text){
-  const box = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  const isUser = role==='user';
-  div.style.cssText = `display:flex;justify-content:${isUser?'flex-end':'flex-start'};margin:2px 0`;
-  const bubble = document.createElement('div');
-  bubble.style.cssText = `max-width:75%;padding:9px 13px;border-radius:${isUser?'16px 16px 4px 16px':'16px 16px 16px 4px'};background:${isUser?'var(--ac)':'var(--bg2)'};color:${isUser?'#fff':'var(--tx)'};font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word`;
-  bubble.textContent = text;
-  div.appendChild(bubble);
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-
-function showTyping(){
-  const box = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.id='typing-indicator';
-  div.style.cssText='display:flex;justify-content:flex-start;margin:2px 0';
-  div.innerHTML='<div style="padding:9px 13px;border-radius:16px 16px 16px 4px;background:var(--bg2);color:var(--tx2);font-size:13px">해영이 답장 중...</div>';
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-
-function removeTyping(){
-  const t = document.getElementById('typing-indicator');
-  if(t) t.remove();
-}
-
-async function callGemini(apiKey, messages, systemPrompt){
-  const contents = [];
-  // system을 첫 user 메시지로 변환 (Gemini 방식)
-  const allMsgs = [...messages];
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const body = {
-    system_instruction: { parts:[{text: systemPrompt}] },
-    contents: allMsgs.map(m=>({
-      role: m.role==='assistant'?'model':'user',
-      parts:[{text: m.content}]
-    })),
-    generationConfig:{ temperature:0.9, maxOutputTokens:1000 }
-  };
-  const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
-  if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'Gemini 오류'); }
-  const data = await res.json();
-  return data.candidates[0].content.parts[0].text;
-}
-
-async function callClaude(apiKey, messages, systemPrompt){
-  const res = await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,system:systemPrompt,messages})
-  });
-  if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'Claude 오류'); }
-  const data = await res.json();
-  return data.content[0].text;
-}
-
-async function sendChat(){
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if(!text) return;
-
-  const s = DB.settings||{};
-  const aiModel = s.ai||'ollama';
-
-  if(aiModel==='gemini' && !s.geminiKey){ alert('설정 탭에서 Gemini API 키를 입력해주세요.'); return; }
-  if(aiModel==='claude' && !s.claudeKey){ alert('설정 탭에서 Claude API 키를 입력해주세요.'); return; }
-
-  input.value='';
-  appendMsg('user', text);
-  chatHistory.push({role:'user', content:text});
-
-  showTyping();
-  try{
-    const systemPrompt = buildSystemPrompt();
-    let reply='';
-    if(aiModel==='gemini'){
-      reply = await callGemini(s.geminiKey, chatHistory, systemPrompt);
-    } else if(aiModel==='claude'){
-      reply = await callClaude(s.claudeKey, chatHistory, systemPrompt);
-    } else {
-      // Ollama
-      const res = await fetch('http://localhost:11434/api/chat',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:s.ollamaModel||'exaone3.5:7.8b',stream:false,
-          messages:[{role:'system',content:systemPrompt},...chatHistory]})
-      });
-      const data = await res.json();
-      reply = data.message?.content||'응답 없음';
-    }
-    removeTyping();
-    chatHistory.push({role:'assistant', content:reply});
-    appendMsg('assistant', reply);
-  } catch(err){
-    removeTyping();
-    appendMsg('assistant', '오류: '+err.message);
-  }
-}
-
 function applyCfg(){
   const s=DB.settings||{};
   const el=document.getElementById('cfg-ai');if(el)el.value=s.ai||'ollama';
   const om=document.getElementById('cfg-ollama');if(om)om.value=s.ollamaModel||'exaone3.5:7.8b';
   const ck=document.getElementById('cfg-claude');if(ck)ck.value=s.claudeKey||'';
-  const gk=document.getElementById('cfg-gemini');if(gk)gk.value=s.geminiKey||'';
   const ok=document.getElementById('cfg-openai');if(ok)ok.value=s.openaiKey||'';
 }
 
