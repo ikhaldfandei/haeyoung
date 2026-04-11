@@ -663,14 +663,14 @@ textarea{line-height:1.6;min-height:70px}
   <div class="chat-head">
     <div>
       <div class="chat-head-title">🤖 해영이와 대화</div>
-      <div class="chat-head-sub" id="chat-status">3-2 점검 모드 — Gemini 호출만 연결했고, 최종 채팅 로직은 아직 안전 점검 중이에요</div>
+      <div class="chat-head-sub" id="chat-status">해영이와 대화 중 — 채팅 기록은 자동 저장돼요</div>
     </div>
     <button class="chat-clear" onclick="clearChat()">대화 비우기</button>
   </div>
   <div class="chat-body" id="chat-messages">
     <div class="chat-empty" id="chat-empty">
       <div class="chat-empty-title">해영이와 대화를 시작해보세요</div>
-      <div class="chat-empty-sub">지금은 3-2 단계라 Gemini 호출만 따로 점검하고 있어요. 최종 채팅 연결은 아직 단계적으로 붙이는 중이에요</div>
+      <div class="chat-empty-sub">이제 채팅 기록 저장과 복원이 연결됐어요. Enter로 전송하고, Shift+Enter로 줄바꿈할 수 있어요.</div>
     </div>
   </div>
   <div class="chat-compose">
@@ -808,6 +808,7 @@ textarea{line-height:1.6;min-height:70px}
 let DB = {
   haeyoung:{}, hyunsoo:{},
   lives:[], memories:[], album:[], logs:[],
+  chatHistory:[],
   settings:{theme:'dark',ai:'ollama',ollamaModel:'exaone3.5:7.8b',geminiKey:'',claudeKey:'',openaiKey:''}
 };
 let dirty = false;
@@ -14458,7 +14459,7 @@ function init(){
   renderThemes();
   applyTheme(DB.settings.theme||'dark', false);
   applyCfg();
-  refreshChatPhaseUI();
+  hydrateChatHistory();
   const cid=localStorage.getItem('gd_cid')||'';
   if(cid) document.getElementById('gd-cid').value=cid;
   gdRefUI();
@@ -14985,13 +14986,18 @@ function loadFromLS(){
     if(hs.called) setIList('hs-called',hs.called);
     if(hs.avatarImg){const av=document.getElementById('hs-avatar');av.innerHTML=`<img src="${hs.avatarImg}" alt=""><input type="file" id="hs-avatar-input" accept="image/*" style="display:none" onchange="setAvatar('hs',this)">`;}
     if(hs.name) document.getElementById('hs-dispname').textContent=hs.name;
+    DB.chatHistory = (Array.isArray(DB.chatHistory)?DB.chatHistory:[])
+      .map(normalizeChatEntry)
+      .filter(Boolean)
+      .slice(-CHAT_HISTORY_LIMIT);
   }catch(e){console.error('불러오기 실패:',e);}
 }
 
 
 // ════════════════════════════════
-// 채팅 기능 (3-1 안전 패치: 시스템 프롬프트 조립만)
+// 채팅 기능 (3-3 완료: 히스토리 저장/복원 + 로딩/오류 처리)
 // ════════════════════════════════
+const CHAT_HISTORY_LIMIT = 100;
 let chatHistory = [];
 let _chatBusy = false;
 let _lastSystemPrompt = '';
@@ -15017,14 +15023,18 @@ function setChatFoot(msg=''){
   if(el) el.textContent=msg;
 }
 function refreshChatPhaseUI(){
-  setChatStatus('3-2 점검 모드 — Gemini 호출만 연결했고, 최종 채팅 로직은 아직 안전 점검 중이에요');
+  if(_chatBusy){
+    setChatStatus('해영이가 답하는 중...');
+  }else{
+    setChatStatus('해영이와 대화 중 — 채팅 기록은 자동 저장돼요');
+  }
   if(!_lastPromptMeta){
-    setChatFoot('현재 단계: Gemini 호출 단독 점검\n최종 채팅 연결은 아직 단계적으로 진행 중');
+    setChatFoot(`대화 기록 ${chatHistory.length}개 저장됨\nEnter 전송 / Shift+Enter 줄바꿈`);
     return;
   }
   setChatFoot(
-`현재 단계: buildSystemPrompt() 점검
-마지막 생성: ${_lastPromptMeta.createdAt}
+`대화 기록 ${chatHistory.length}개 저장됨
+마지막 프롬프트 생성: ${_lastPromptMeta.createdAt}
 프롬프트 길이: ${_lastPromptMeta.promptLength}자
 포함 데이터: 전생 전체 ${_lastPromptMeta.totalLives}건 / 관련 ${_lastPromptMeta.selectedLives}건, 기억 ${_lastPromptMeta.selectedMemories}건, 로그 ${_lastPromptMeta.selectedLogs}건`
   );
@@ -15032,46 +15042,107 @@ function refreshChatPhaseUI(){
 function escapeHtml(str){
   return String(str??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
-function appendMsg(role, text){
+function formatChatTime(ts){
+  if(!ts) return '';
+  try{
+    return new Date(ts).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  }catch(_err){
+    return '';
+  }
+}
+function scrollChatToBottom(){
   const wrap=document.getElementById('chat-messages');
-  if(!wrap) return;
-  hideChatEmpty();
+  if(wrap) wrap.scrollTop=wrap.scrollHeight;
+}
+function createChatRow(role, isHtml=false, content='', ts=''){
   const row=document.createElement('div');
   const rowClass = role==='user' ? 'me' : role==='assistant' ? 'ai' : 'sys';
   row.className='chat-row '+rowClass;
   const bubble=document.createElement('div');
   bubble.className='chat-bubble';
-  bubble.textContent=text;
+  if(isHtml) bubble.innerHTML=content;
+  else bubble.textContent=content;
+  if(ts && role!=='system'){
+    const stamp=document.createElement('div');
+    stamp.style.marginTop='6px';
+    stamp.style.fontSize='10px';
+    stamp.style.opacity='0.7';
+    stamp.textContent=formatChatTime(ts);
+    bubble.appendChild(stamp);
+  }
   row.appendChild(bubble);
-  wrap.appendChild(row);
-  wrap.scrollTop=wrap.scrollHeight;
+  return row;
 }
-function appendHtmlMsg(role, html){
+function appendMsg(role, text, opts={}){
+  const wrap=document.getElementById('chat-messages');
+  if(!wrap) return null;
+  hideChatEmpty();
+  const row=createChatRow(role, false, text, opts.ts||'');
+  if(opts.loading) row.dataset.loading='1';
+  wrap.appendChild(row);
+  scrollChatToBottom();
+  return row;
+}
+function appendHtmlMsg(role, html, opts={}){
+  const wrap=document.getElementById('chat-messages');
+  if(!wrap) return null;
+  hideChatEmpty();
+  const row=createChatRow(role, true, html, opts.ts||'');
+  if(opts.loading) row.dataset.loading='1';
+  wrap.appendChild(row);
+  scrollChatToBottom();
+  return row;
+}
+function normalizeChatEntry(msg){
+  if(!msg || typeof msg!=='object') return null;
+  const role = msg.role==='assistant' ? 'assistant' : msg.role==='system' ? 'system' : 'user';
+  const content = String(msg.content??msg.text??'').trim();
+  if(!content) return null;
+  return {
+    role,
+    content,
+    ts: msg.ts || new Date().toISOString()
+  };
+}
+function trimChatHistory(){
+  if(chatHistory.length>CHAT_HISTORY_LIMIT){
+    chatHistory = chatHistory.slice(-CHAT_HISTORY_LIMIT);
+  }
+  DB.chatHistory = chatHistory.map(m=>({...m}));
+}
+function persistChatHistory(){
+  DB.chatHistory = chatHistory.map(m=>({...m}));
+  trimChatHistory();
+  saveAll(true);
+  refreshChatPhaseUI();
+}
+function hydrateChatHistory(){
   const wrap=document.getElementById('chat-messages');
   if(!wrap) return;
-  hideChatEmpty();
-  const row=document.createElement('div');
-  const rowClass = role==='user' ? 'me' : role==='assistant' ? 'ai' : 'sys';
-  row.className='chat-row '+rowClass;
-  const bubble=document.createElement('div');
-  bubble.className='chat-bubble';
-  bubble.innerHTML=html;
-  row.appendChild(bubble);
-  wrap.appendChild(row);
-  wrap.scrollTop=wrap.scrollHeight;
+  [...wrap.children].forEach(el=>{if(el.id!=='chat-empty') el.remove();});
+  chatHistory = (Array.isArray(DB.chatHistory)?DB.chatHistory:[])
+    .map(normalizeChatEntry)
+    .filter(Boolean)
+    .slice(-CHAT_HISTORY_LIMIT);
+  DB.chatHistory = chatHistory.map(m=>({...m}));
+  chatHistory.forEach(msg=>{
+    appendMsg(msg.role, msg.content, {ts:msg.ts});
+  });
+  showChatEmptyIfNeeded();
+  refreshChatPhaseUI();
 }
-
 function clearChat(){
   chatHistory=[];
+  DB.chatHistory=[];
   _lastSystemPrompt='';
   _lastPromptMeta=null;
   const wrap=document.getElementById('chat-messages');
   if(!wrap) return;
   [...wrap.children].forEach(el=>{if(el.id!=='chat-empty') el.remove();});
+  persistChatHistory();
   showChatEmptyIfNeeded();
-  refreshChatPhaseUI();
+  setChatFoot('대화 기록을 비웠어요\nEnter 전송 / Shift+Enter 줄바꿈');
 }
-
 function chatKeyDown(e){
   if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
 }
@@ -15322,7 +15393,7 @@ async function callClaude(apiKey, history, systemPrompt){
   throw new Error('아직 3-2 단계에서는 Claude 호출을 연결하지 않았어. 설정에서 Gemini를 선택해줘.');
 }
 
-// ── 메인 전송 함수 (3-2: Gemini 호출만 단독 점검)
+// ── 메인 전송 함수 (3-3: 저장/복원/로딩/오류 처리 완료)
 async function sendChat(){
   if(_chatBusy) return;
   const input=document.getElementById('chat-input');
@@ -15331,16 +15402,22 @@ async function sendChat(){
   if(!text) return;
 
   _chatBusy=true;
+  let loadingRow=null;
   if(sendBtn){
     sendBtn.disabled=true;
-    sendBtn.textContent='호출 중...';
+    sendBtn.textContent='답변 중...';
   }
-  setChatStatus('3-2 점검 모드 — API 호출 진행 중');
+  setChatStatus('해영이가 답하는 중...');
 
   try{
     input.value='';
-    appendMsg('user', text);
-    chatHistory.push({role:'user', content:text});
+
+    const userMsg={role:'user', content:text, ts:new Date().toISOString()};
+    chatHistory.push(userMsg);
+    trimChatHistory();
+    appendMsg('user', text, {ts:userMsg.ts});
+
+    loadingRow=appendMsg('system', '해영이가 답하고 있어요...', {loading:true});
 
     const prompt=buildSystemPrompt(text);
     refreshChatPhaseUI();
@@ -15352,29 +15429,34 @@ async function sendChat(){
     }else if(aiType==='claude'){
       result={model:'claude', text:await callClaude(DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'', chatHistory, prompt)};
     }else{
-      throw new Error('3-2 단계에서는 Gemini만 연결했어. 설정에서 AI 모델을 Gemini로 바꿔줘.');
+      throw new Error('현재 채팅은 Gemini만 연결돼 있어. 설정에서 AI 모델을 Gemini로 바꿔줘.');
     }
 
-    chatHistory.push({role:'assistant', content:result.text});
-    appendHtmlMsg('ai',
-      `<strong>3-2 Gemini 연결 점검</strong><br><br>`+
-      `${escapeHtml(result.text).replace(/\n/g,'<br>')}<br><br>`+
-      `<span style="color:var(--tx3)">모델: ${escapeHtml(result.model)} · 프롬프트 길이 ${_lastPromptMeta.promptLength}자 · 디버그 프롬프트는 window.__haeyoungLastSystemPrompt 에 저장됨</span>`
-    );
-    setChatStatus('3-2 점검 모드 — Gemini 응답 수신 완료');
-    console.log('[3-2] Gemini prompt\n', prompt);
-    console.log('[3-2] Gemini response\n', result.raw);
+    if(loadingRow) loadingRow.remove();
+
+    const aiMsg={role:'assistant', content:result.text, ts:new Date().toISOString()};
+    chatHistory.push(aiMsg);
+    trimChatHistory();
+    appendMsg('assistant', result.text, {ts:aiMsg.ts});
+
+    persistChatHistory();
+    console.log('[3-3] Gemini prompt\\n', prompt);
+    console.log('[3-3] Gemini response\\n', result.raw);
   }catch(err){
-    console.error('[3-2] chat error:', err);
-    appendMsg('system', '⚠ API 호출 중 오류가 났어: '+err.message);
-    setChatStatus('3-2 점검 모드 — 호출 오류');
+    console.error('[3-3] chat error:', err);
+    if(loadingRow) loadingRow.remove();
+    appendMsg('system', '⚠ 답변을 가져오는 중 오류가 났어: '+err.message);
+    setChatStatus('오류가 났지만 입력창은 그대로 복구했어요');
+    refreshChatPhaseUI();
   }finally{
     _chatBusy=false;
     if(sendBtn){
       sendBtn.disabled=false;
       sendBtn.textContent='전송';
     }
+    refreshChatPhaseUI();
     input?.focus();
+    scrollChatToBottom();
   }
 }
 
