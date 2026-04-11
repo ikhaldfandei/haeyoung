@@ -663,14 +663,14 @@ textarea{line-height:1.6;min-height:70px}
   <div class="chat-head">
     <div>
       <div class="chat-head-title">🤖 해영이와 대화</div>
-      <div class="chat-head-sub" id="chat-status">3-1 점검 모드 — 아직 API 호출은 연결하지 않았어요</div>
+      <div class="chat-head-sub" id="chat-status">3-2 점검 모드 — Gemini 호출만 연결했고, 최종 채팅 로직은 아직 안전 점검 중이에요</div>
     </div>
     <button class="chat-clear" onclick="clearChat()">대화 비우기</button>
   </div>
   <div class="chat-body" id="chat-messages">
     <div class="chat-empty" id="chat-empty">
       <div class="chat-empty-title">해영이와 대화를 시작해보세요</div>
-      <div class="chat-empty-sub">지금은 3-1 단계라 실제 AI 호출 없이 시스템 프롬프트만 안전하게 조립해요</div>
+      <div class="chat-empty-sub">지금은 3-2 단계라 Gemini 호출만 따로 점검하고 있어요. 최종 채팅 연결은 아직 단계적으로 붙이는 중이에요</div>
     </div>
   </div>
   <div class="chat-compose">
@@ -15017,9 +15017,9 @@ function setChatFoot(msg=''){
   if(el) el.textContent=msg;
 }
 function refreshChatPhaseUI(){
-  setChatStatus('3-1 점검 모드 — 아직 API 호출은 연결하지 않았어요');
+  setChatStatus('3-2 점검 모드 — Gemini 호출만 연결했고, 최종 채팅 로직은 아직 안전 점검 중이에요');
   if(!_lastPromptMeta){
-    setChatFoot('현재 단계: buildSystemPrompt() 점검\n실제 API 호출은 아직 하지 않음');
+    setChatFoot('현재 단계: Gemini 호출 단독 점검\n최종 채팅 연결은 아직 단계적으로 진행 중');
     return;
   }
   setChatFoot(
@@ -15258,17 +15258,71 @@ function buildSystemPrompt(userMsg){
   return pack.prompt;
 }
 
-// ── Gemini API 호출 (3-2에서 연결 예정)
+// ── Gemini API 호출 (3-2: 단독 연결)
 async function callGemini(apiKey, history, systemPrompt){
-  throw new Error('아직 3-1 단계입니다. 실제 Gemini 호출은 3-2에서 연결할 예정입니다.');
+  const safeKey=(apiKey||'').trim();
+  if(!safeKey) throw new Error('설정 탭에 Google Gemini API 키를 먼저 넣어줘.');
+
+  const model='gemini-2.5-flash';
+  const contents=(history||[])
+    .filter(m=>m && (m.role==='user' || m.role==='assistant') && String(m.content||'').trim())
+    .map(m=>({
+      role:m.role==='assistant' ? 'model' : 'user',
+      parts:[{text:String(m.content).trim()}]
+    }));
+
+  if(!contents.length){
+    throw new Error('보낼 대화 내용이 없어.');
+  }
+
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(safeKey)}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      systemInstruction:{
+        role:'system',
+        parts:[{text:systemPrompt}]
+      },
+      contents,
+      generationConfig:{
+        temperature:0.9,
+        topP:0.95,
+        maxOutputTokens:2048
+      }
+    })
+  });
+
+  let data=null;
+  try{
+    data=await res.json();
+  }catch(_err){
+    throw new Error('Gemini 응답을 해석하지 못했어.');
+  }
+
+  if(!res.ok){
+    const apiMsg=data?.error?.message||`HTTP ${res.status}`;
+    throw new Error('Gemini 호출 실패: '+apiMsg);
+  }
+
+  const parts=data?.candidates?.[0]?.content?.parts||[];
+  const text=parts.map(p=>p?.text||'').join('').trim();
+  if(!text){
+    throw new Error('Gemini가 비어 있는 응답을 돌려줬어.');
+  }
+
+  return {
+    model,
+    text,
+    raw:data
+  };
 }
 
 // ── Claude API 호출 (3-2 이후 필요 시 연결)
 async function callClaude(apiKey, history, systemPrompt){
-  throw new Error('아직 3-1 단계입니다. 실제 Claude 호출은 연결하지 않았습니다.');
+  throw new Error('아직 3-2 단계에서는 Claude 호출을 연결하지 않았어. 설정에서 Gemini를 선택해줘.');
 }
 
-// ── 메인 전송 함수 (3-1: 프롬프트 조립 점검만)
+// ── 메인 전송 함수 (3-2: Gemini 호출만 단독 점검)
 async function sendChat(){
   if(_chatBusy) return;
   const input=document.getElementById('chat-input');
@@ -15279,8 +15333,9 @@ async function sendChat(){
   _chatBusy=true;
   if(sendBtn){
     sendBtn.disabled=true;
-    sendBtn.textContent='분석 중...';
+    sendBtn.textContent='호출 중...';
   }
+  setChatStatus('3-2 점검 모드 — API 호출 진행 중');
 
   try{
     input.value='';
@@ -15289,20 +15344,30 @@ async function sendChat(){
 
     const prompt=buildSystemPrompt(text);
     refreshChatPhaseUI();
-    appendHtmlMsg('system',
-      `<strong>3-1 점검 모드</strong><br><br>`+
-      `아직 API 호출은 하지 않았고, 현재 메시지 기준으로 시스템 프롬프트만 안전하게 조립했어.<br><br>`+
-      `- 프롬프트 길이: <strong>${_lastPromptMeta.promptLength}자</strong><br>`+
-      `- 전생 포함: 전체 ${_lastPromptMeta.totalLives}건 / 관련 ${_lastPromptMeta.selectedLives}건<br>`+
-      `- 기억 포함: ${_lastPromptMeta.selectedMemories}건<br>`+
-      `- 로그 포함: ${_lastPromptMeta.selectedLogs}건<br><br>`+
-      `<span style="color:var(--tx3)">디버그용으로 window.__haeyoungLastSystemPrompt 에 마지막 프롬프트를 저장해두었어.</span>`
+
+    const aiType=(DB.settings?.ai||document.getElementById('cfg-ai')?.value||'gemini').trim();
+    let result=null;
+    if(aiType==='gemini'){
+      result=await callGemini(DB.settings?.geminiKey||document.getElementById('cfg-gemini')?.value||'', chatHistory, prompt);
+    }else if(aiType==='claude'){
+      result={model:'claude', text:await callClaude(DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'', chatHistory, prompt)};
+    }else{
+      throw new Error('3-2 단계에서는 Gemini만 연결했어. 설정에서 AI 모델을 Gemini로 바꿔줘.');
+    }
+
+    chatHistory.push({role:'assistant', content:result.text});
+    appendHtmlMsg('ai',
+      `<strong>3-2 Gemini 연결 점검</strong><br><br>`+
+      `${escapeHtml(result.text).replace(/\n/g,'<br>')}<br><br>`+
+      `<span style="color:var(--tx3)">모델: ${escapeHtml(result.model)} · 프롬프트 길이 ${_lastPromptMeta.promptLength}자 · 디버그 프롬프트는 window.__haeyoungLastSystemPrompt 에 저장됨</span>`
     );
-    console.log('[3-1] buildSystemPrompt preview\n', prompt);
+    setChatStatus('3-2 점검 모드 — Gemini 응답 수신 완료');
+    console.log('[3-2] Gemini prompt\n', prompt);
+    console.log('[3-2] Gemini response\n', result.raw);
   }catch(err){
-    console.error('[3-1] prompt build error:', err);
-    appendMsg('system', '⚠ 시스템 프롬프트 조립 중 오류가 났어: '+err.message);
-    setChatStatus('3-1 점검 모드 — 프롬프트 조립 오류');
+    console.error('[3-2] chat error:', err);
+    appendMsg('system', '⚠ API 호출 중 오류가 났어: '+err.message);
+    setChatStatus('3-2 점검 모드 — 호출 오류');
   }finally{
     _chatBusy=false;
     if(sendBtn){
