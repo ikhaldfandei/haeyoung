@@ -15029,7 +15029,7 @@ function refreshChatPhaseUI(){
     setChatStatus('해영이와 대화 중 — 채팅 기록은 자동 저장돼요');
   }
   if(!_lastPromptMeta){
-    setChatFoot(`대화 기록 ${chatHistory.length}개 저장됨\nEnter 전송 / Shift+Enter 줄바꿈`);
+    setChatFoot(`대화 기록 ${chatHistory.length}개 저장됨\nEnter 전송 / Shift+Enter 줄바꿈\n4-1 점검: 답변마다 선별 컨텍스트를 안내해요`);
     return;
   }
   setChatFoot(
@@ -15219,13 +15219,38 @@ function pickRelevantLives(userMsg, max=3){
     .slice(0,max)
     .filter(l=>l.__score>0 || l.cur);
 }
+function selectRelevantContext(userMsg){
+  const relLives=pickRelevantLives(userMsg, 3);
+  const memories=pickRelevantMemories(userMsg, 6);
+  const logs=pickRelevantLogs(userMsg, 4);
+
+  const previewLives=relLives.map(l=>`${l.num||'?'}번째 삶 · ${toOneLine(l.title||l.sub||'제목 없음')}`);
+  const previewMemories=memories.map(m=>toOneLine(m.title||m.date||'제목 없음'));
+  const previewLogs=logs.map(l=>toOneLine(l.title||l.date||'제목 없음'));
+
+  return {
+    relLives,
+    memories,
+    logs,
+    previewLives,
+    previewMemories,
+    previewLogs
+  };
+}
+function formatSelectedContextNotice(meta){
+  const lives=(meta?.previewLives?.length ? meta.previewLives.join(' / ') : '없음');
+  const memories=(meta?.previewMemories?.length ? meta.previewMemories.join(' / ') : '없음');
+  const logs=(meta?.previewLogs?.length ? meta.previewLogs.join(' / ') : '없음');
+  return `이번 답변에 반영한 컨텍스트\n전생 ${meta?.selectedLives||0}개: ${lives}\n기억 ${meta?.selectedMemories||0}개: ${memories}\n로그 ${meta?.selectedLogs||0}개: ${logs}`;
+}
 function collectPromptContext(userMsg){
   const hy=DB.haeyoung||{};
   const hs=DB.hyunsoo||{};
   const lives=DB.lives||[];
-  const memories=pickRelevantMemories(userMsg, 6);
-  const logs=pickRelevantLogs(userMsg, 4);
-  const relLives=pickRelevantLives(userMsg, 3);
+  const selected=selectRelevantContext(userMsg);
+  const memories=selected.memories;
+  const logs=selected.logs;
+  const relLives=selected.relLives;
 
   const lifeTimeline=lives.map(l=>{
     const badge=l.cur?'★ 현재 진행':'';
@@ -15315,7 +15340,10 @@ ${logDetails||'- 직접 겹치는 로그 기록 없음'}
       totalLives:lives.length,
       selectedLives:relLives.length,
       selectedMemories:memories.length,
-      selectedLogs:logs.length
+      selectedLogs:logs.length,
+      previewLives:selected.previewLives,
+      previewMemories:selected.previewMemories,
+      previewLogs:selected.previewLogs
     }
   };
 }
@@ -15420,6 +15448,7 @@ async function sendChat(){
     loadingRow=appendMsg('system', '해영이가 답하고 있어요...', {loading:true});
 
     const prompt=buildSystemPrompt(text);
+    appendMsg('system', formatSelectedContextNotice(_lastPromptMeta));
     refreshChatPhaseUI();
 
     const aiType=(DB.settings?.ai||document.getElementById('cfg-ai')?.value||'gemini').trim();
