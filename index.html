@@ -412,7 +412,7 @@ textarea{line-height:1.6;min-height:70px}
   <div class="save-ind" id="sind"></div>
   <div class="save-txt" id="stxt">저장됨</div>
   <button class="hbtn" onclick="exportData()">📤</button>
-  <button class="hbtn pri" onclick="saveAll()">💾 저장</button>
+  <button class="hbtn pri" id="top-save-btn" onclick="saveTopAction()">💾 저장</button>
 </div>
 
 <!-- 탭바 -->
@@ -14932,6 +14932,11 @@ function collectData(){
     claudeKey:fv('cfg-claude'),
     openaiKey:fv('cfg-openai'),
   };
+}
+
+
+function saveTopAction(){
+  return gdPush(false);
 }
 
 function saveAll(silent=false){
