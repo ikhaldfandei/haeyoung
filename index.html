@@ -15000,6 +15000,7 @@ function loadFromLS(){
 const CHAT_HISTORY_LIMIT = 100;
 let chatHistory = [];
 let _chatBusy = false;
+let _chatReqSeq = 0;
 let _lastSystemPrompt = '';
 let _lastPromptMeta = null;
 
@@ -15502,6 +15503,7 @@ async function sendChat(){
   const text=input?.value?.trim();
   if(!text) return;
 
+  const requestId=++_chatReqSeq;
   _chatBusy=true;
   let loadingRow=null;
   if(sendBtn){
@@ -15510,14 +15512,13 @@ async function sendChat(){
   }
   setChatStatus('해영이가 답하는 중...');
 
+  const pendingUserMsg={role:'user', content:text, ts:new Date().toISOString()};
+  const requestHistory=[...chatHistory, pendingUserMsg];
+
   try{
     input.value='';
 
-    const userMsg={role:'user', content:text, ts:new Date().toISOString()};
-    chatHistory.push(userMsg);
-    trimChatHistory();
-    appendMsg('user', text, {ts:userMsg.ts});
-
+    appendMsg('user', text, {ts:pendingUserMsg.ts});
     loadingRow=appendMsg('system', '해영이가 답하고 있어요...', {loading:true});
 
     const prompt=buildSystemPrompt(text);
@@ -15527,30 +15528,40 @@ async function sendChat(){
     const aiType=(DB.settings?.ai||document.getElementById('cfg-ai')?.value||'gemini').trim();
     let result=null;
     if(aiType==='gemini'){
-      result=await callGemini(DB.settings?.geminiKey||document.getElementById('cfg-gemini')?.value||'', chatHistory, prompt);
+      result=await callGemini(DB.settings?.geminiKey||document.getElementById('cfg-gemini')?.value||'', requestHistory, prompt);
     }else if(aiType==='claude'){
-      result={model:'claude', text:await callClaude(DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'', chatHistory, prompt)};
+      result={model:'claude', text:await callClaude(DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'', requestHistory, prompt)};
     }else{
       throw new Error('현재 채팅은 Gemini만 연결돼 있어. 설정에서 AI 모델을 Gemini로 바꿔줘.');
+    }
+
+    if(requestId!==_chatReqSeq){
+      return;
     }
 
     if(loadingRow) loadingRow.remove();
 
     const aiMsg={role:'assistant', content:result.text, ts:new Date().toISOString()};
-    chatHistory.push(aiMsg);
+    chatHistory.push(pendingUserMsg, aiMsg);
     trimChatHistory();
     appendMsg('assistant', result.text, {ts:aiMsg.ts});
 
     persistChatHistory();
-    console.log('[3-3] Gemini prompt\\n', prompt);
-    console.log('[3-3] Gemini response\\n', result.raw);
+    console.log('[3-3] Gemini prompt\n', prompt);
+    console.log('[3-3] Gemini response\n', result.raw);
   }catch(err){
+    if(requestId!==_chatReqSeq){
+      return;
+    }
     console.error('[3-3] chat error:', err);
     if(loadingRow) loadingRow.remove();
     appendMsg('system', '⚠ 답변을 가져오는 중 오류가 났어: '+err.message);
     setChatStatus('오류가 났지만 입력창은 그대로 복구했어요');
     refreshChatPhaseUI();
   }finally{
+    if(requestId!==_chatReqSeq){
+      return;
+    }
     _chatBusy=false;
     if(sendBtn){
       sendBtn.disabled=false;
