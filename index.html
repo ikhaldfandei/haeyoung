@@ -355,8 +355,11 @@ textarea{line-height:1.6;min-height:70px}
 /* ══════════════════════════
    토스트
 ══════════════════════════ */
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surf3);border:1px solid var(--bdr2);color:var(--tx);padding:9px 18px;border-radius:10px;font-size:12px;z-index:300;transition:transform .3s;white-space:nowrap}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surf3);border:1px solid var(--bdr2);color:var(--tx);padding:9px 18px;border-radius:10px;font-size:12px;z-index:300;transition:transform .3s;white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.18)}
 #toast.show{transform:translateX(-50%) translateY(0)}
+#toast.ok{background:var(--gn);border-color:var(--gn);color:#fff}
+#toast.err{background:var(--rd);border-color:var(--rd);color:#fff}
+#toast.info{background:var(--ac);border-color:var(--ac);color:#fff}
 
 .empty{text-align:center;padding:40px 20px;color:var(--tx3)}
 .empty-icon{font-size:36px;margin-bottom:10px}
@@ -14727,28 +14730,50 @@ function updateStorageInfo(){
   refreshLocalBackupUI();
 }
 function gdLog(msg,isErr=false){const el=document.getElementById('gd-log');if(!el)return;el.style.color=isErr?'var(--rd)':'var(--tx3)';el.textContent=msg;}
+function gdBar(msg,type=''){
+  const bar=document.getElementById('gd-bar'); if(!bar) return;
+  bar.className='gd-bar'+(type==='ok'?' ok':type==='err'?' err':'');
+  bar.textContent=msg;
+}
+function gdSetActionState(kind,busy,label){
+  const btn=document.getElementById(kind==='push'?'gd-push':'gd-pull');
+  const other=document.getElementById(kind==='push'?'gd-pull':'gd-push');
+  if(!btn) return;
+  if(!btn.dataset.baseLabel) btn.dataset.baseLabel=btn.textContent.trim();
+  if(other && !other.dataset.baseLabel) other.dataset.baseLabel=other.textContent.trim();
+  if(busy){
+    btn.textContent=label;
+    btn.disabled=true;
+    if(other) other.disabled=true;
+  }else{
+    btn.textContent=btn.dataset.baseLabel||btn.textContent;
+    if(other) other.textContent=other.dataset.baseLabel||other.textContent;
+    gdRefUI();
+  }
+}
 function gdRefUI(){
   const tok=gdLoadTok(),cid=gdCid();
   const bar=document.getElementById('gd-bar'),con=document.getElementById('gd-con'),dis=document.getElementById('gd-dis'),push=document.getElementById('gd-push'),pull=document.getElementById('gd-pull');
   const auto=document.getElementById('gd-auto'); if(auto) auto.checked=localStorage.getItem('gd_auto')==='1';
   refreshLocalBackupUI();
+  if(_gdBusy) return;
   if(tok){
     const last=localStorage.getItem('gd_last');
     bar.className='gd-bar ok';
     bar.innerHTML='✅ Google Drive 연결됨'+(last?`<br><span style="font-size:10px;color:var(--tx3)">마지막 저장: ${fmtTs(last)}</span>`:'');
     gdLog(last?`최근 Drive 저장: ${fmtTs(last)}`:'연결됨 — 아직 Drive 저장 이력 없음');
-    if(con)con.style.display='none';if(dis)dis.style.display='';if(push)push.disabled=false;if(pull)pull.disabled=false;
+    if(con)con.style.display='none';if(dis)dis.style.display='';if(push){push.disabled=false;if(push.dataset.baseLabel)push.textContent=push.dataset.baseLabel;}if(pull){pull.disabled=false;if(pull.dataset.baseLabel)pull.textContent=pull.dataset.baseLabel;}
   }else{
     bar.className='gd-bar';
     bar.textContent=cid?'🔗 Client ID 입력됨 — Google 계정 연결 버튼을 눌러주세요':'⚙ Client ID를 먼저 입력해주세요';
     gdLog(cid?'아직 Google 계정 연결 전입니다.':'Client ID를 먼저 입력해야 합니다.');
-    if(con)con.style.display=cid?'':'none';if(dis)dis.style.display='none';if(push)push.disabled=true;if(pull)pull.disabled=true;
+    if(con)con.style.display=cid?'':'none';if(dis)dis.style.display='none';if(push){push.disabled=true;if(push.dataset.baseLabel)push.textContent=push.dataset.baseLabel;}if(pull){pull.disabled=true;if(pull.dataset.baseLabel)pull.textContent=pull.dataset.baseLabel;}
   }
 }
 function gdConnect(){
-  const cid=gdCid(); if(!cid){toast('Client ID를 먼저 입력해주세요',true);return;}
+  const cid=gdCid(); if(!cid){toast('Client ID를 먼저 입력해주세요','err');return;}
   if(typeof google==='undefined' || !google.accounts || !google.accounts.oauth2){toast('Google 라이브러리 로딩 중... 잠시 후 다시 시도해주세요');return;}
-  const client=google.accounts.oauth2.initTokenClient({client_id:cid,scope:GD_SCOPE,callback:(r)=>{if(r.error){toast('Drive 연결 실패: '+r.error,true);gdLog('Drive 연결 실패: '+r.error,true);return;}gdSaveTok(r.access_token,r.expires_in);toast('✅ Google Drive 연결 완료!');gdRefUI();}});
+  const client=google.accounts.oauth2.initTokenClient({client_id:cid,scope:GD_SCOPE,callback:(r)=>{if(r.error){toast('Drive 연결 실패: '+r.error,'err');gdLog('Drive 연결 실패: '+r.error,true);return;}gdSaveTok(r.access_token,r.expires_in);toast('✅ Google Drive 연결 완료!');gdRefUI();}});
   client.requestAccessToken({prompt:'consent'});
 }
 async function gdSilentRefresh(){
@@ -14784,8 +14809,19 @@ async function gdApi(method,url,token,body,ct){
 async function gdFind(token,fname){const r=await gdApi('GET',`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`name='${fname}' and trashed=false`)}&fields=files(id,name)`,token);return r.files?.[0]||null;}
 async function gdPush(silentToast=false){
   saveAll(true);
-  const token=await gdGetTok();if(!token){if(!silentToast)toast('먼저 Google 계정을 연결해주세요');gdLog('Drive 저장 전 Google 계정 연결이 필요합니다.',true);return;}
-  if(_gdBusy)return;_gdBusy=true;
+  const token=await gdGetTok();
+  if(!token){
+    if(!silentToast)toast('먼저 Google 계정을 연결해주세요','err');
+    gdLog('Drive 저장 전 Google 계정 연결이 필요합니다.',true);
+    gdBar('🔗 먼저 Google 계정을 연결해주세요','err');
+    return;
+  }
+  if(_gdBusy)return;
+  _gdBusy=true;
+  gdSetActionState('push',true,'💾 Google Drive에 저장 중...');
+  gdBar('💾 Google Drive에 저장 중...');
+  gdLog('Google Drive에 저장 중입니다...');
+  if(!silentToast) toast('💾 Google Drive에 저장 중...','info',1200);
   try{
     const payload=localStorage.getItem(LS_MAIN_KEY)||JSON.stringify(DB);
     const existing=await gdFind(token,GD_FNAME);
@@ -14801,26 +14837,64 @@ ${payload}
 --${boundary}--`;
     const url=existing?`https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=multipart`:`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
     await gdApi(existing?'PATCH':'POST',url,token,body,`multipart/related; boundary=${boundary}`);
-    localStorage.setItem('gd_last',new Date().toISOString());
-    gdRefUI();
+    const nowIso=new Date().toISOString();
+    const nowText=new Date(nowIso).toLocaleTimeString('ko-KR');
+    localStorage.setItem('gd_last',nowIso);
+    gdBar(`✓ Drive 저장 완료 — ${nowText}`,'ok');
+    gdLog(`Drive 저장 완료 — ${fmtTs(nowIso)}`);
     updateStorageInfo();
-    if(!silentToast) toast('☁ Google Drive에 저장 완료!');
-  }catch(e){gdLog('Drive 저장 실패: '+e.message,true);if(!silentToast)toast('Drive 저장 실패: '+e.message,true);}
-  _gdBusy=false;
+    if(!silentToast) toast(`✓ Drive 저장 완료 — ${nowText}`,'ok',2600);
+  }catch(e){
+    gdBar('⚠ Drive 저장 실패 — '+e.message,'err');
+    gdLog('Drive 저장 실패: '+e.message,true);
+    if(!silentToast)toast('Drive 저장 실패: '+e.message,'err',3200);
+  }finally{
+    _gdBusy=false;
+    gdSetActionState('push',false);
+  }
 }
 async function gdPull(){
-  const token=await gdGetTok();if(!token){toast('먼저 Google 계정을 연결해주세요');gdLog('Drive 불러오기 전 Google 계정 연결이 필요합니다.',true);return;}
+  const token=await gdGetTok();
+  if(!token){
+    toast('먼저 Google 계정을 연결해주세요','err');
+    gdLog('Drive 불러오기 전 Google 계정 연결이 필요합니다.',true);
+    gdBar('🔗 먼저 Google 계정을 연결해주세요','err');
+    return;
+  }
   if(!confirm('Google Drive의 데이터로 현재 데이터를 덮어씁니다. 계속할까요?'))return;
+  if(_gdBusy)return;
+  _gdBusy=true;
+  gdSetActionState('pull',true,'📥 Google Drive에서 불러오는 중...');
+  gdBar('📥 Google Drive에서 불러오는 중...');
+  gdLog('Google Drive에서 데이터를 불러오는 중입니다...');
+  toast('📥 Google Drive에서 불러오는 중...','info',1200);
   try{
-    const existing=await gdFind(token,GD_FNAME);if(!existing){toast('Drive에 저장된 데이터가 없어요');return;}
+    const existing=await gdFind(token,GD_FNAME);
+    if(!existing){
+      gdBar('⚠ Drive에 저장된 데이터가 없어요','err');
+      toast('Drive에 저장된 데이터가 없어요','err',2600);
+      return;
+    }
     const text=await gdApi('GET',`https://www.googleapis.com/drive/v3/files/${existing.id}?alt=media`,token);
     const d=typeof text==='string'?JSON.parse(text):text;
     DB={...DB,...d};
     const payload=JSON.stringify(DB);
     saveLocalCopies(payload);
-    localStorage.setItem('gd_last',new Date().toISOString());
-    location.reload();
-  }catch(e){gdLog('Drive 불러오기 실패: '+e.message,true);toast('Drive 불러오기 실패: '+e.message,true);}
+    const nowIso=new Date().toISOString();
+    localStorage.setItem('gd_last',nowIso);
+    gdBar('✓ Drive 불러오기 완료 — 새로고침합니다','ok');
+    gdLog(`Drive 불러오기 완료 — ${fmtTs(nowIso)}`);
+    toast('✓ Drive 불러오기 완료 — 새로고침합니다','ok',1200);
+    setTimeout(()=>location.reload(),700);
+    return;
+  }catch(e){
+    gdBar('⚠ Drive 불러오기 실패 — '+e.message,'err');
+    gdLog('Drive 불러오기 실패: '+e.message,true);
+    toast('Drive 불러오기 실패: '+e.message,'err',3200);
+  }finally{
+    _gdBusy=false;
+    gdSetActionState('pull',false);
+  }
 }
 function gdDisconnect(){if(!confirm('Google Drive 연결을 해제할까요?'))return;_gdToken=null;localStorage.removeItem('gd_tok');localStorage.removeItem('gd_tok_exp');gdRefUI();toast('Drive 연결 해제됨');}
 
@@ -14872,7 +14946,7 @@ function saveAll(silent=false){
     return true;
   }catch(e){
     console.error('저장 실패:', e);
-    toast('저장 실패: '+e.message, true);
+    toast('저장 실패: '+e.message,'err');
     return false;
   }
 }
@@ -15130,7 +15204,7 @@ function importData(inp){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();r.onload=e=>{
     try{const d=JSON.parse(e.target.result);if(!confirm('현재 데이터를 덮어쓸까요?'))return;DB=d;saveLocalCopies(JSON.stringify(DB));updateStorageInfo();location.reload();}
-    catch(err){toast('파일 읽기 실패: '+err.message);}
+    catch(err){toast('파일 읽기 실패: '+err.message,'err');}
   };r.readAsText(f);
 }
 function resetAll(){if(!confirm('정말 모든 데이터를 초기화할까요? 되돌릴 수 없어요.'))return;localStorage.removeItem('hdb');location.reload();}
@@ -15139,7 +15213,18 @@ function resetAll(){if(!confirm('정말 모든 데이터를 초기화할까요? 
 // 토스트
 // ════════════════════════════════
 let _tt;
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),2500);}
+function toast(msg,type='default',ms=2500){
+  const t=document.getElementById('toast');
+  if(!t) return;
+  t.className='';
+  t.textContent=msg;
+  if(type==='ok') t.classList.add('ok');
+  else if(type==='err') t.classList.add('err');
+  else if(type==='info') t.classList.add('info');
+  t.classList.add('show');
+  clearTimeout(_tt);
+  _tt=setTimeout(()=>{t.className='';},ms);
+}
 
 // ════════════════════════════════
 // 자동 저장
