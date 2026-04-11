@@ -15000,7 +15000,6 @@ function loadFromLS(){
 const CHAT_HISTORY_LIMIT = 100;
 let chatHistory = [];
 let _chatBusy = false;
-let _chatReqSeq = 0;
 let _lastSystemPrompt = '';
 let _lastPromptMeta = null;
 
@@ -15181,8 +15180,10 @@ const CONTEXT_KEYWORDS={
   names:['해영','도해영','도도','영아','복복이','현수','강현수','토토','자기'],
   emotion:['사랑','좋아','보고싶','그립','귀여','사랑스','예쁘','부끄','귀빨개','울컥','울보','울','눈물','서운','속상','미안','불안','걱정','외롭','공황','위로','안아','키스','화나','화났','질투','집착'],
   relation:['연애','사귀','커플','반지','결혼','헤어지','이별','같이','함께','데이트','약속','신혼','집착','소유욕','믿음'],
-  timeline:['전생','삶','이번생','이번 생','현재','과거','예전','마지막','지금','어제','오늘','처음','그때'],
-  safety:['괜찮','쉬어','안정','진정','달래','불안','공황','울','상처','트리거']
+  timeline:['전생','삶','이번생','이번 생','현재','지금','요즘','과거','예전','그때','처음','마지막'],
+  safety:['괜찮','쉬어','안정','진정','달래','불안','공황','울','상처','트리거'],
+  logHints:['로그','대화','대사','말했','말해','했던 말','했던말','장면','기록','카톡','문자','편지','쪽지','서재','고백','고백했','불러줘'],
+  memoryHints:['기억','추억','반지','처음','만남','고백','결혼','공황','불안','약속','선물']
 };
 function countKeywordMatches(text, keywords){
   const hay=String(text??'').toLowerCase();
@@ -15218,6 +15219,24 @@ function detectLifeSignals(text){
     wantsCurrent:/이번\s*생|현재|지금|요즘|마지막\s*삶/.test(src)
   };
 }
+function detectContextIntent(text){
+  const src=String(text??'');
+  const lower=src.toLowerCase();
+  const lifeSignals=detectLifeSignals(src);
+  const asksLogs=/로그|대사|무슨 말|뭐라고 했|했던 말|했던말|대화|장면|편지|쪽지|문자|카톡|고백해줘|불러줘/.test(src) || /["“”'‘’]/.test(src);
+  const asksMemories=/기억|추억|기억나|반지|선물|만남|처음|결혼|고백|공황|불안|약속/.test(src);
+  const emotional=countKeywordMatches(lower, CONTEXT_KEYWORDS.emotion) + countKeywordMatches(lower, CONTEXT_KEYWORDS.safety);
+  const relational=countKeywordMatches(lower, CONTEXT_KEYWORDS.relation);
+  return {
+    lifeSignals,
+    asksLogs,
+    asksMemories,
+    emotional,
+    relational,
+    wantsLives: lifeSignals.wantsPast || lifeSignals.wantsCurrent || lifeSignals.nums.length>0,
+    exactFocus: tokenizeMessage(src).filter(tok=>tok.length>=2)
+  };
+}
 function uniqueBy(items, keyFn){
   const seen=new Set();
   const out=[];
@@ -15233,64 +15252,93 @@ function clipText(text, maxLen=240){
   const s=normalizePromptText(text);
   return s.length>maxLen ? s.slice(0,maxLen-1)+'…' : s;
 }
+function scoreExactFocus(base, focusWords){
+  const hay=String(base??'').toLowerCase();
+  let score=0;
+  (focusWords||[]).forEach(tok=>{
+    if(!tok) return;
+    if(hay.includes(tok)) score += tok.length>=3 ? 8 : 5;
+  });
+  return score;
+}
 function pickRelevantMemories(userMsg, max=5){
   const tokens=tokenizeMessage(userMsg);
-  const lifeSignals=detectLifeSignals(userMsg);
   const lowerMsg=String(userMsg??'').toLowerCase();
+  const intent=detectContextIntent(userMsg);
   const ranked=(DB.memories||[])
     .map((m,idx)=>{
       const tags=Array.isArray(m.tags)?m.tags.join(' '):'';
       const base=[m.date,m.title,m.content,tags].join(' ');
-      let score=scoreByTokens(base,tokens);
-      score += Number(m.importance||0)*3;
-      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 3);
-      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 2);
-      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.safety, 4);
-      if((m.title||'').includes('현재') || (m.date||'').includes('현재')) score += lifeSignals.wantsCurrent ? 5 : 2;
-      if(lifeSignals.wantsPast && /전생|과거|예전|삶/.test(base)) score += 4;
-      if(countKeywordMatches(lowerMsg, CONTEXT_KEYWORDS.names) && countKeywordMatches(base, CONTEXT_KEYWORDS.names)) score += 2;
+      const title=(m.title||'').toLowerCase();
+      const content=(m.content||'').toLowerCase();
+      let score=0;
+      score += scoreExactFocus(title+' '+tags, intent.exactFocus) * 1.3;
+      score += scoreByTokens(title+' '+tags, tokens) * 1.5;
+      score += scoreByTokens(content, tokens) * 0.65;
+      score += Number(m.importance||0) * 2;
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 2.5);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 3.5);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.safety, 4.5);
+      if(intent.emotional && /(공황|불안|위로|안정|호흡|트리거|눈물)/.test(base)) score += 10;
+      if(intent.relational && /(반지|결혼|고백|데이트|약속|선물|커플)/.test(base)) score += 9;
+      if(/반지/.test(lowerMsg) && /(반지)/.test(base)) score += 18;
+      if(/공황|불안/.test(lowerMsg) && /(공황|불안|호흡|달래|안정|트리거)/.test(base)) score += 18;
+      if(/처음|첫/.test(lowerMsg) && /(처음|첫|만남)/.test(base)) score += 10;
       return {...m,__score:score,__idx:idx};
     })
     .sort((a,b)=>b.__score-a.__score || Number(b.importance||0)-Number(a.importance||0) || a.__idx-b.__idx);
-  const filtered=ranked.filter(m=>m.__score>=5 || Number(m.importance||0)>=3);
+  const minScore = /반지|공황|불안|결혼|고백|선물|처음/.test(lowerMsg) ? 12 : (intent.emotional || intent.relational || intent.asksMemories ? 10 : 14);
+  const filtered=ranked.filter(m=>m.__score>=minScore || (Number(m.importance||0)>=4 && m.__score>=8));
   return uniqueBy(filtered, m=>`${m.date||''}|${m.title||''}|${clipText(m.content||'',40)}`).slice(0,max);
 }
 function pickRelevantLogs(userMsg, max=3){
+  const intent=detectContextIntent(userMsg);
+  if(!intent.asksLogs) return [];
   const tokens=tokenizeMessage(userMsg);
   const lowerMsg=String(userMsg??'').toLowerCase();
   const ranked=(DB.logs||[])
     .map((l,idx)=>{
+      const title=(l.title||'').toLowerCase();
+      const content=(l.content||'').toLowerCase();
       const base=[l.date,l.title,l.content].join(' ');
-      let score=scoreByTokens(base,tokens);
-      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 2);
-      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 2);
-      score += idx===0 ? 3 : idx===1 ? 2 : 0;
-      if(/오늘|방금|최근|요즘/.test(userMsg) && idx < 3) score += 3;
+      let score=0;
+      score += scoreExactFocus(title, intent.exactFocus) * 1.4;
+      score += scoreByTokens(title, tokens) * 1.6;
+      score += scoreByTokens(content, tokens) * 0.75;
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.logHints, 4);
+      if(/반지/.test(lowerMsg) && /반지/.test(base)) score += 12;
+      if(/고백|사랑한다고|사랑한|직구 고백/.test(lowerMsg) && /고백|사랑한|사랑한다/.test(base)) score += 10;
+      if(/대사|무슨 말|했던 말|뭐라고/.test(userMsg) && idx < 5) score += 4;
       return {...l,__score:score,__idx:idx};
     })
     .sort((a,b)=>b.__score-a.__score || a.__idx-b.__idx);
-  const filtered=ranked.filter(l=>l.__score>=4);
+  const filtered=ranked.filter(l=>l.__score>=12);
   return uniqueBy(filtered, l=>`${l.date||''}|${l.title||''}|${clipText(l.content||'',40)}`).slice(0,max);
 }
 function pickRelevantLives(userMsg, max=3){
   const tokens=tokenizeMessage(userMsg);
-  const lifeSignals=detectLifeSignals(userMsg);
   const lowerMsg=String(userMsg??'').toLowerCase();
+  const intent=detectContextIntent(userMsg);
+  if(!intent.wantsLives) return [];
   const ranked=(DB.lives||[])
     .map((l,idx)=>{
       const num=Number(l.num||0);
+      const title=(l.title||'').toLowerCase();
       const base=[l.num,l.title,l.sub,l.summary,l.lesson,l.memo].join(' ');
-      let score=scoreByTokens(base,tokens);
-      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 2);
-      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 3);
-      if(l.cur) score += lifeSignals.wantsCurrent ? 8 : 3;
-      if(lifeSignals.wantsPast && !l.cur) score += 4;
-      if(lifeSignals.nums.includes(num)) score += 14;
-      if(/마지막 삶/.test(userMsg) && (l.cur || /마지막/.test(base))) score += 8;
+      let score=0;
+      score += scoreExactFocus(title, intent.exactFocus) * 1.2;
+      score += scoreByTokens(title+' '+(l.sub||''), tokens) * 1.5;
+      score += scoreByTokens(base, tokens) * 0.8;
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 1.8);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 2.5);
+      if(l.cur) score += intent.lifeSignals.wantsCurrent ? 9 : 0;
+      if(intent.lifeSignals.wantsPast && !l.cur) score += 6;
+      if(intent.lifeSignals.nums.includes(num)) score += 24;
+      if(/마지막 삶/.test(userMsg) && (l.cur || /마지막/.test(base))) score += 10;
       return {...l,__score:score,__idx:idx};
     })
     .sort((a,b)=>b.__score-a.__score || Number(a.num||0)-Number(b.num||0));
-  const filtered=ranked.filter(l=>l.__score>=4 || l.cur && lifeSignals.wantsCurrent);
+  const filtered=ranked.filter(l=>l.__score>=12 || (intent.lifeSignals.nums.includes(Number(l.num||0))));
   return uniqueBy(filtered, l=>`${l.num||''}|${l.title||''}|${l.sub||''}`).slice(0,max);
 }
 function selectRelevantContext(userMsg){
@@ -15503,7 +15551,6 @@ async function sendChat(){
   const text=input?.value?.trim();
   if(!text) return;
 
-  const requestId=++_chatReqSeq;
   _chatBusy=true;
   let loadingRow=null;
   if(sendBtn){
@@ -15512,13 +15559,14 @@ async function sendChat(){
   }
   setChatStatus('해영이가 답하는 중...');
 
-  const pendingUserMsg={role:'user', content:text, ts:new Date().toISOString()};
-  const requestHistory=[...chatHistory, pendingUserMsg];
-
   try{
     input.value='';
 
-    appendMsg('user', text, {ts:pendingUserMsg.ts});
+    const userMsg={role:'user', content:text, ts:new Date().toISOString()};
+    chatHistory.push(userMsg);
+    trimChatHistory();
+    appendMsg('user', text, {ts:userMsg.ts});
+
     loadingRow=appendMsg('system', '해영이가 답하고 있어요...', {loading:true});
 
     const prompt=buildSystemPrompt(text);
@@ -15528,40 +15576,30 @@ async function sendChat(){
     const aiType=(DB.settings?.ai||document.getElementById('cfg-ai')?.value||'gemini').trim();
     let result=null;
     if(aiType==='gemini'){
-      result=await callGemini(DB.settings?.geminiKey||document.getElementById('cfg-gemini')?.value||'', requestHistory, prompt);
+      result=await callGemini(DB.settings?.geminiKey||document.getElementById('cfg-gemini')?.value||'', chatHistory, prompt);
     }else if(aiType==='claude'){
-      result={model:'claude', text:await callClaude(DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'', requestHistory, prompt)};
+      result={model:'claude', text:await callClaude(DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'', chatHistory, prompt)};
     }else{
       throw new Error('현재 채팅은 Gemini만 연결돼 있어. 설정에서 AI 모델을 Gemini로 바꿔줘.');
-    }
-
-    if(requestId!==_chatReqSeq){
-      return;
     }
 
     if(loadingRow) loadingRow.remove();
 
     const aiMsg={role:'assistant', content:result.text, ts:new Date().toISOString()};
-    chatHistory.push(pendingUserMsg, aiMsg);
+    chatHistory.push(aiMsg);
     trimChatHistory();
     appendMsg('assistant', result.text, {ts:aiMsg.ts});
 
     persistChatHistory();
-    console.log('[3-3] Gemini prompt\n', prompt);
-    console.log('[3-3] Gemini response\n', result.raw);
+    console.log('[3-3] Gemini prompt\\n', prompt);
+    console.log('[3-3] Gemini response\\n', result.raw);
   }catch(err){
-    if(requestId!==_chatReqSeq){
-      return;
-    }
     console.error('[3-3] chat error:', err);
     if(loadingRow) loadingRow.remove();
     appendMsg('system', '⚠ 답변을 가져오는 중 오류가 났어: '+err.message);
     setChatStatus('오류가 났지만 입력창은 그대로 복구했어요');
     refreshChatPhaseUI();
   }finally{
-    if(requestId!==_chatReqSeq){
-      return;
-    }
     _chatBusy=false;
     if(sendBtn){
       sendBtn.disabled=false;
