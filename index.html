@@ -810,6 +810,7 @@ let DB = {
 let dirty = false;
 let memEditIdx = -1;
 let _gdToken = null, _gdBusy = false, _gdAutoTimer = null;
+let _isBooting = true;
 const GD_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const GD_FNAME = 'haeyoung_db.json';
 const LS_MAIN_KEY='hdb';
@@ -14436,6 +14437,7 @@ const THEME_LIST = [
 // 초기화
 // ════════════════════════════════
 function init(){
+  _isBooting = true;
   loadFromLS();
   // 최초 실행 시 기본값 세팅 (loadFromLS 직후, render 전에 해야 함)
   if(!DB.memories || DB.memories.length === 0) {
@@ -14451,12 +14453,14 @@ function init(){
   renderAlbum();
   renderLogs();
   renderThemes();
-  applyTheme(DB.settings.theme||'dark');
+  applyTheme(DB.settings.theme||'dark', false);
   applyCfg();
   const cid=localStorage.getItem('gd_cid')||'';
   if(cid) document.getElementById('gd-cid').value=cid;
   gdRefUI();
   updateStorageInfo();
+  clearDirty();
+  _isBooting = false;
 }
 
 // ════════════════════════════════
@@ -14680,10 +14684,11 @@ function renderThemes(){
     g.appendChild(d);
   });
 }
-function applyTheme(id){
+function applyTheme(id, mark=true){
   id = normalizeThemeId(id);
   document.body.className=id==='dark'?'':'th-'+id;
-  DB.settings.theme=id; markDirty();
+  DB.settings.theme=id;
+  if(mark) markDirty();
 }
 
 // ════════════════════════════════
@@ -14822,7 +14827,7 @@ function gdDisconnect(){if(!confirm('Google Drive 연결을 해제할까요?'))r
 // ════════════════════════════════
 // 저장 / 불러오기
 // ════════════════════════════════
-function markDirty(){dirty=true;document.getElementById('sind').classList.add('dirty');document.getElementById('stxt').textContent='저장 안 됨';queueAutoDriveSave();}
+function markDirty(){if(_isBooting) return; dirty=true;document.getElementById('sind').classList.add('dirty');document.getElementById('stxt').textContent='저장 안 됨';queueAutoDriveSave();}
 function clearDirty(){dirty=false;document.getElementById('sind').classList.remove('dirty');document.getElementById('stxt').textContent='저장됨';}
 
 function collectData(){
@@ -14856,13 +14861,20 @@ function collectData(){
 }
 
 function saveAll(silent=false){
-  collectData();
-  const payload=JSON.stringify(DB);
-  saveLocalCopies(payload);
-  clearDirty();
-  refreshLocalBackupUI();
-  updateStorageInfo();
-  if(!silent) toast('💾 저장되었어요');
+  try{
+    collectData();
+    const payload=JSON.stringify(DB);
+    saveLocalCopies(payload);
+    clearDirty();
+    refreshLocalBackupUI();
+    updateStorageInfo();
+    if(!silent) toast('💾 저장되었어요');
+    return true;
+  }catch(e){
+    console.error('저장 실패:', e);
+    toast('저장 실패: '+e.message, true);
+    return false;
+  }
 }
 
 function loadFromLS(){
@@ -15132,7 +15144,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 // ════════════════════════════════
 // 자동 저장
 // ════════════════════════════════
-setInterval(()=>{if(dirty)saveAll();},30000);
+setInterval(()=>{if(dirty)saveAll(true);},30000);
 window.addEventListener('beforeunload',()=>{if(dirty)saveAll();});
 
 init();
