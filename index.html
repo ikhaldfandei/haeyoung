@@ -15029,7 +15029,7 @@ function refreshChatPhaseUI(){
     setChatStatus('해영이와 대화 중 — 채팅 기록은 자동 저장돼요');
   }
   if(!_lastPromptMeta){
-    setChatFoot(`대화 기록 ${chatHistory.length}개 저장됨\nEnter 전송 / Shift+Enter 줄바꿈\n4-1 점검: 답변마다 선별 컨텍스트를 안내해요`);
+    setChatFoot(`대화 기록 ${chatHistory.length}개 저장됨\nEnter 전송 / Shift+Enter 줄바꿈\n4-2 점검: 선별 기준을 더 촘촘하게 다듬었어요`);
     return;
   }
   setChatFoot(
@@ -15157,72 +15157,145 @@ function arrText(arr, sep=' / ', max=12){
   return (Array.isArray(arr)?arr:[]).map(toOneLine).filter(Boolean).slice(0,max).join(sep);
 }
 function tokenizeMessage(text){
-  return [...new Set(
-    String(text??'')
-      .toLowerCase()
-      .split(/[\s,.;:!?()[\]{}"'`~|\\/+=_*#@%^&-]+/)
-      .map(s=>s.trim())
-      .filter(Boolean)
-      .filter(s=>s.length>1)
-  )];
+  const src=String(text??'').toLowerCase();
+  const base=src
+    .split(/[\s,.;:!?()[\]{}"'`~|\\/+=_*#@%^&-]+/)
+    .map(s=>s.trim())
+    .filter(Boolean)
+    .filter(s=>s.length>1);
+  const stems=base.map(s=>s.replace(/(이야|예요|어요|아요|였다|했다|하고|해서|하면|하는|했다가|하게|하게끔|처럼|까지|부터|에서|으로|에게|한테|이다|였다|네요|아요|어요|고|는|은|이|가|을|를|와|과|도|만)$/,''));
+  return [...new Set([...base, ...stems].filter(Boolean).filter(s=>s.length>1))];
 }
 function scoreByTokens(text, tokens){
   const hay=String(text??'').toLowerCase();
   if(!hay) return 0;
   let score=0;
   tokens.forEach(tok=>{
-    if(hay.includes(tok)) score += tok.length>=3 ? 3 : 2;
+    if(!tok) return;
+    if(hay.includes(tok)) score += tok.length>=4 ? 5 : tok.length===3 ? 3 : 2;
   });
   return score;
+}
+const CONTEXT_KEYWORDS={
+  names:['해영','도해영','도도','영아','복복이','현수','강현수','토토','자기'],
+  emotion:['사랑','좋아','보고싶','그립','귀여','사랑스','예쁘','부끄','귀빨개','울컥','울보','울','눈물','서운','속상','미안','불안','걱정','외롭','공황','위로','안아','키스','화나','화났','질투','집착'],
+  relation:['연애','사귀','커플','반지','결혼','헤어지','이별','같이','함께','데이트','약속','신혼','집착','소유욕','믿음'],
+  timeline:['전생','삶','이번생','이번 생','현재','과거','예전','마지막','지금','어제','오늘','처음','그때'],
+  safety:['괜찮','쉬어','안정','진정','달래','불안','공황','울','상처','트리거']
+};
+function countKeywordMatches(text, keywords){
+  const hay=String(text??'').toLowerCase();
+  let count=0;
+  (keywords||[]).forEach(word=>{
+    if(word && hay.includes(String(word).toLowerCase())) count += 1;
+  });
+  return count;
+}
+function scoreKeywordCategory(userMsg, targetText, keywords, weight){
+  const userCount=countKeywordMatches(userMsg, keywords);
+  const targetCount=countKeywordMatches(targetText, keywords);
+  if(!userCount || !targetCount) return 0;
+  return Math.min(userCount, 3) * Math.min(targetCount, 3) * weight;
+}
+function detectLifeSignals(text){
+  const src=String(text??'');
+  const nums=new Set();
+  [...src.matchAll(/([1-9])\s*번째\s*삶/g)].forEach(m=>nums.add(Number(m[1])));
+  const numWords={
+    '첫번째 삶':1,'첫 번째 삶':1,'첫삶':1,'첫 삶':1,'1번째 삶':1,
+    '두번째 삶':2,'두 번째 삶':2,'둘째 삶':2,'2번째 삶':2,
+    '세번째 삶':3,'세 번째 삶':3,'셋째 삶':3,'3번째 삶':3,
+    '네번째 삶':4,'네 번째 삶':4,'넷째 삶':4,'4번째 삶':4,
+    '다섯번째 삶':5,'다섯 번째 삶':5,'5번째 삶':5,
+    '여섯번째 삶':6,'여섯 번째 삶':6,'6번째 삶':6,
+    '일곱번째 삶':7,'일곱 번째 삶':7,'7번째 삶':7
+  };
+  Object.entries(numWords).forEach(([k,v])=>{ if(src.includes(k)) nums.add(v); });
+  return {
+    nums:[...nums],
+    wantsPast:/전생|과거|예전|그때|몇번째 삶|몇 번째 삶|삶/.test(src),
+    wantsCurrent:/이번\s*생|현재|지금|요즘|마지막\s*삶/.test(src)
+  };
+}
+function uniqueBy(items, keyFn){
+  const seen=new Set();
+  const out=[];
+  (items||[]).forEach(item=>{
+    const key=String(keyFn(item) || '').trim();
+    if(!key || seen.has(key)) return;
+    seen.add(key);
+    out.push(item);
+  });
+  return out;
 }
 function clipText(text, maxLen=240){
   const s=normalizePromptText(text);
   return s.length>maxLen ? s.slice(0,maxLen-1)+'…' : s;
 }
-function pickRelevantMemories(userMsg, max=6){
+function pickRelevantMemories(userMsg, max=5){
   const tokens=tokenizeMessage(userMsg);
-  return (DB.memories||[])
+  const lifeSignals=detectLifeSignals(userMsg);
+  const lowerMsg=String(userMsg??'').toLowerCase();
+  const ranked=(DB.memories||[])
     .map((m,idx)=>{
       const tags=Array.isArray(m.tags)?m.tags.join(' '):'';
       const base=[m.date,m.title,m.content,tags].join(' ');
       let score=scoreByTokens(base,tokens);
-      score += Number(m.importance||0)*4;
-      if((m.title||'').includes('현재') || (m.date||'').includes('현재')) score += 2;
+      score += Number(m.importance||0)*3;
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 3);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 2);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.safety, 4);
+      if((m.title||'').includes('현재') || (m.date||'').includes('현재')) score += lifeSignals.wantsCurrent ? 5 : 2;
+      if(lifeSignals.wantsPast && /전생|과거|예전|삶/.test(base)) score += 4;
+      if(countKeywordMatches(lowerMsg, CONTEXT_KEYWORDS.names) && countKeywordMatches(base, CONTEXT_KEYWORDS.names)) score += 2;
       return {...m,__score:score,__idx:idx};
     })
-    .sort((a,b)=>b.__score-a.__score || Number(b.importance||0)-Number(a.importance||0) || a.__idx-b.__idx)
-    .slice(0,max)
-    .filter(m=>m.__score>0 || Number(m.importance||0)>=2);
+    .sort((a,b)=>b.__score-a.__score || Number(b.importance||0)-Number(a.importance||0) || a.__idx-b.__idx);
+  const filtered=ranked.filter(m=>m.__score>=5 || Number(m.importance||0)>=3);
+  return uniqueBy(filtered, m=>`${m.date||''}|${m.title||''}|${clipText(m.content||'',40)}`).slice(0,max);
 }
-function pickRelevantLogs(userMsg, max=4){
+function pickRelevantLogs(userMsg, max=3){
   const tokens=tokenizeMessage(userMsg);
-  return (DB.logs||[])
+  const lowerMsg=String(userMsg??'').toLowerCase();
+  const ranked=(DB.logs||[])
     .map((l,idx)=>{
       const base=[l.date,l.title,l.content].join(' ');
-      const score=scoreByTokens(base,tokens) + (idx===0 ? 1 : 0);
+      let score=scoreByTokens(base,tokens);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 2);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 2);
+      score += idx===0 ? 3 : idx===1 ? 2 : 0;
+      if(/오늘|방금|최근|요즘/.test(userMsg) && idx < 3) score += 3;
       return {...l,__score:score,__idx:idx};
     })
-    .sort((a,b)=>b.__score-a.__score || a.__idx-b.__idx)
-    .slice(0,max)
-    .filter(l=>l.__score>0);
+    .sort((a,b)=>b.__score-a.__score || a.__idx-b.__idx);
+  const filtered=ranked.filter(l=>l.__score>=4);
+  return uniqueBy(filtered, l=>`${l.date||''}|${l.title||''}|${clipText(l.content||'',40)}`).slice(0,max);
 }
 function pickRelevantLives(userMsg, max=3){
   const tokens=tokenizeMessage(userMsg);
-  return (DB.lives||[])
+  const lifeSignals=detectLifeSignals(userMsg);
+  const lowerMsg=String(userMsg??'').toLowerCase();
+  const ranked=(DB.lives||[])
     .map((l,idx)=>{
+      const num=Number(l.num||0);
       const base=[l.num,l.title,l.sub,l.summary,l.lesson,l.memo].join(' ');
       let score=scoreByTokens(base,tokens);
-      if(l.cur) score += 3;
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.emotion, 2);
+      score += scoreKeywordCategory(lowerMsg, base, CONTEXT_KEYWORDS.relation, 3);
+      if(l.cur) score += lifeSignals.wantsCurrent ? 8 : 3;
+      if(lifeSignals.wantsPast && !l.cur) score += 4;
+      if(lifeSignals.nums.includes(num)) score += 14;
+      if(/마지막 삶/.test(userMsg) && (l.cur || /마지막/.test(base))) score += 8;
       return {...l,__score:score,__idx:idx};
     })
-    .sort((a,b)=>b.__score-a.__score || Number(a.num||0)-Number(b.num||0))
-    .slice(0,max)
-    .filter(l=>l.__score>0 || l.cur);
+    .sort((a,b)=>b.__score-a.__score || Number(a.num||0)-Number(b.num||0));
+  const filtered=ranked.filter(l=>l.__score>=4 || l.cur && lifeSignals.wantsCurrent);
+  return uniqueBy(filtered, l=>`${l.num||''}|${l.title||''}|${l.sub||''}`).slice(0,max);
 }
 function selectRelevantContext(userMsg){
   const relLives=pickRelevantLives(userMsg, 3);
-  const memories=pickRelevantMemories(userMsg, 6);
-  const logs=pickRelevantLogs(userMsg, 4);
+  const memories=pickRelevantMemories(userMsg, 5);
+  const logs=pickRelevantLogs(userMsg, 3);
 
   const previewLives=relLives.map(l=>`${l.num||'?'}번째 삶 · ${toOneLine(l.title||l.sub||'제목 없음')}`);
   const previewMemories=memories.map(m=>toOneLine(m.title||m.date||'제목 없음'));
