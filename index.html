@@ -687,10 +687,23 @@ textarea{line-height:1.6;min-height:70px}
     <div class="tgrid" id="tgrid"></div>
   </div>
 
-  <!-- 구글 드라이브 -->
+  <!-- 구글 드라이브 / 로컬 백업 -->
   <div class="card">
-    <div class="clabel">☁ Google Drive 연동</div>
-    <div class="gd-bar" id="gd-bar">⚙ Client ID를 입력하면 Google 계정 연결이 가능해요</div>
+    <div class="clabel">☁ Google Drive 동기화 <span style="font-size:11px;color:var(--tx3);font-weight:400">— 마케팅허브 방식으로 저장/불러오기</span></div>
+    <div class="gd-bar" id="gd-bar">🔄 Google Drive 상태 확인 중...</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.8;background:var(--surf2);padding:12px;border-radius:10px;border-left:3px solid var(--ac)">
+      <b>최초 1회 설정:</b><br>
+      1. 아래 Client ID 입력란에 Google Cloud OAuth Client ID를 입력하세요<br>
+      2. <b>Google 계정 연결</b> 버튼 클릭 → 로그인<br>
+      3. 이후 <b>☁ Drive에 저장</b> / <b>⬇ Drive에서 불러오기</b> 버튼으로 동기화<br>
+      <span style="color:var(--tx3);font-size:11px">📌 Client ID: console.cloud.google.com → 사용자 인증 정보 → OAuth 2.0 클라이언트 ID</span>
+    </div>
+    <div style="font-size:11px;color:var(--tx3);margin-bottom:12px;line-height:1.8;background:var(--surf2);padding:10px 12px;border-radius:10px;border:1px solid var(--bdr)">
+      🔐 <b>연결 방식: PKCE + 토큰 복원</b><br>
+      • 처음 한 번 연결하면 브라우저에 로그인 상태와 토큰 정보가 저장됩니다<br>
+      • 토큰이 만료되면 가능한 경우 조용히 재인증을 시도합니다<br>
+      • Drive 저장이 실패해도 로컬 기본 저장본과 백업 사본은 유지됩니다
+    </div>
     <div class="flabel">Google Cloud OAuth Client ID</div>
     <input type="text" id="gd-cid" placeholder="123456789.apps.googleusercontent.com" oninput="localStorage.setItem('gd_cid',this.value);gdRefUI()">
     <div style="display:flex;gap:7px;margin-top:8px;flex-wrap:wrap">
@@ -699,9 +712,32 @@ textarea{line-height:1.6;min-height:70px}
       <button class="btn" id="gd-pull" onclick="gdPull()" disabled>⬇ Drive에서 불러오기</button>
       <button class="btn dn" id="gd-dis" onclick="gdDisconnect()" style="display:none">연결 해제</button>
     </div>
-    <div style="font-size:11px;color:var(--tx3);margin-top:8px;line-height:1.7">
-      📌 console.cloud.google.com → 사용자 인증 정보 → OAuth 2.0 클라이언트 ID<br>
-      승인된 JavaScript 원본에 파일을 여는 주소를 추가해야 해요.
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input id="gd-auto" type="checkbox" onchange="gdToggleAuto(this.checked)" style="cursor:pointer">
+      <label for="gd-auto" style="font-size:12px;color:var(--tx2);cursor:pointer">변경 사항이 있으면 30초 뒤 자동으로 Drive 저장 시도</label>
+    </div>
+    <div id="gd-log" style="margin-top:8px;font-size:11px;color:var(--tx3);line-height:1.6"></div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">📦 로컬 백업 / 초기화</div>
+    <div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:8px">로컬 저장 공간 현황
+      <button class="btn" onclick="updateStorageInfo()" style="font-size:11px;padding:3px 8px;margin-left:8px">새로고침</button>
+    </div>
+    <div id="storage-info" style="background:var(--surf2);border-radius:10px;padding:10px;border:1px solid var(--bdr);font-size:11px;color:var(--tx3);line-height:1.7;margin-bottom:8px">로딩 중...</div>
+    <div style="font-size:11px;color:var(--tx3);line-height:1.7;margin-bottom:10px">
+      현재 데이터는 로컬 기본 저장본과 백업 사본에 함께 저장됩니다.<br>
+      추가 보험으로 Drive 저장이나 JSON 백업 내보내기를 주기적으로 해두세요.
+    </div>
+    <div style="padding:10px 12px;border:1px solid var(--bdr);border-radius:10px;background:var(--surf2);font-size:11px;color:var(--tx3);line-height:1.7;margin-bottom:10px">
+      <div><b>로컬 기본 저장:</b> <span id="local-save-status">확인 중...</span></div>
+      <div><b>로컬 백업 사본:</b> <span id="local-backup-status">확인 중...</span></div>
+      <div><b>최근 Drive 저장:</b> <span id="gd-last-status">없음</span></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" onclick="exportData()">📤 JSON 백업 내보내기</button>
+      <button class="btn" onclick="document.getElementById('imp-f').click()">📥 JSON 백업 가져오기</button>
+      <button class="btn dn" onclick="resetAll()">🗑 전체 초기화</button>
     </div>
   </div>
 
@@ -773,9 +809,12 @@ let DB = {
 };
 let dirty = false;
 let memEditIdx = -1;
-let _gdToken = null, _gdBusy = false;
+let _gdToken = null, _gdBusy = false, _gdAutoTimer = null;
 const GD_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const GD_FNAME = 'haeyoung_db.json';
+const LS_MAIN_KEY='hdb';
+const LS_BACKUP_KEY='hdb_backup';
+const LS_META_KEY='hdb_meta';
 
 // ════════════════════════════════
 // 전생 기본 데이터
@@ -14417,6 +14456,7 @@ function init(){
   const cid=localStorage.getItem('gd_cid')||'';
   if(cid) document.getElementById('gd-cid').value=cid;
   gdRefUI();
+  updateStorageInfo();
 }
 
 // ════════════════════════════════
@@ -14652,60 +14692,137 @@ function applyTheme(id){
 function gdCid(){return localStorage.getItem('gd_cid')||'';}
 function gdSaveTok(access,exp){_gdToken=access;localStorage.setItem('gd_tok',access);localStorage.setItem('gd_tok_exp',Date.now()+(exp||3600)*1000-60000);}
 function gdLoadTok(){const exp=parseInt(localStorage.getItem('gd_tok_exp')||'0');if(Date.now()<exp){_gdToken=localStorage.getItem('gd_tok')||null;return _gdToken;}_gdToken=null;return null;}
+function fmtTs(ts){if(!ts)return '없음';try{return new Date(ts).toLocaleString('ko-KR');}catch(_){return ts;}}
+function bytesToKB(n){return Math.max(1,Math.round((n||0)/1024));}
+function getLocalBytes(key){const v=localStorage.getItem(key)||'';return new Blob([v]).size;}
+function writeLsMeta(patch){let meta={};try{meta=JSON.parse(localStorage.getItem(LS_META_KEY)||'{}')||{};}catch(_){meta={};}meta={...meta,...patch};localStorage.setItem(LS_META_KEY,JSON.stringify(meta));return meta;}
+function saveLocalCopies(payload){
+  localStorage.setItem(LS_MAIN_KEY,payload);
+  localStorage.setItem(LS_BACKUP_KEY,payload);
+  writeLsMeta({mainSavedAt:new Date().toISOString(),backupSavedAt:new Date().toISOString()});
+}
+function refreshLocalBackupUI(){
+  let meta={};
+  try{meta=JSON.parse(localStorage.getItem(LS_META_KEY)||'{}')||{};}catch(_){meta={};}
+  const mainEl=document.getElementById('local-save-status');
+  const backupEl=document.getElementById('local-backup-status');
+  const gdLastEl=document.getElementById('gd-last-status');
+  const hasMain=!!localStorage.getItem(LS_MAIN_KEY);
+  const hasBackup=!!localStorage.getItem(LS_BACKUP_KEY);
+  if(mainEl) mainEl.textContent=hasMain?(meta.mainSavedAt?fmtTs(meta.mainSavedAt):'저장됨'):'없음';
+  if(backupEl) backupEl.textContent=hasBackup?(meta.backupSavedAt?fmtTs(meta.backupSavedAt):'저장됨'):'없음';
+  if(gdLastEl) gdLastEl.textContent=fmtTs(localStorage.getItem('gd_last'));
+}
+function updateStorageInfo(){
+  const el=document.getElementById('storage-info'); if(!el) return;
+  const keys=[LS_MAIN_KEY,LS_BACKUP_KEY,LS_META_KEY,'gd_cid','gd_tok','gd_tok_exp','gd_last','gd_auto'];
+  const total=keys.reduce((sum,k)=>sum+getLocalBytes(k),0);
+  const main=getLocalBytes(LS_MAIN_KEY), backup=getLocalBytes(LS_BACKUP_KEY);
+  el.innerHTML=`저장 용량: <b style="color:var(--gn)">${bytesToKB(total)}KB</b> — localStorage 백업 사용 중<br><span style="font-size:10px">main: ${bytesToKB(main)}KB | backup: ${bytesToKB(backup)}KB</span>`;
+  refreshLocalBackupUI();
+}
+function gdLog(msg,isErr=false){const el=document.getElementById('gd-log');if(!el)return;el.style.color=isErr?'var(--rd)':'var(--tx3)';el.textContent=msg;}
 function gdRefUI(){
   const tok=gdLoadTok(),cid=gdCid();
   const bar=document.getElementById('gd-bar'),con=document.getElementById('gd-con'),dis=document.getElementById('gd-dis'),push=document.getElementById('gd-push'),pull=document.getElementById('gd-pull');
-  if(tok){bar.className='gd-bar ok';bar.textContent='✅ Google Drive 연결됨';if(con)con.style.display='none';if(dis)dis.style.display='';if(push)push.disabled=false;if(pull)pull.disabled=false;}
-  else{bar.className='gd-bar';bar.textContent=cid?'🔗 Client ID 입력됨 — Google 계정 연결 버튼을 눌러주세요':'⚙ Client ID를 먼저 입력해주세요';if(con)con.style.display=cid?'':'none';if(dis)dis.style.display='none';if(push)push.disabled=true;if(pull)pull.disabled=true;}
+  const auto=document.getElementById('gd-auto'); if(auto) auto.checked=localStorage.getItem('gd_auto')==='1';
+  refreshLocalBackupUI();
+  if(tok){
+    const last=localStorage.getItem('gd_last');
+    bar.className='gd-bar ok';
+    bar.innerHTML='✅ Google Drive 연결됨'+(last?`<br><span style="font-size:10px;color:var(--tx3)">마지막 저장: ${fmtTs(last)}</span>`:'');
+    gdLog(last?`최근 Drive 저장: ${fmtTs(last)}`:'연결됨 — 아직 Drive 저장 이력 없음');
+    if(con)con.style.display='none';if(dis)dis.style.display='';if(push)push.disabled=false;if(pull)pull.disabled=false;
+  }else{
+    bar.className='gd-bar';
+    bar.textContent=cid?'🔗 Client ID 입력됨 — Google 계정 연결 버튼을 눌러주세요':'⚙ Client ID를 먼저 입력해주세요';
+    gdLog(cid?'아직 Google 계정 연결 전입니다.':'Client ID를 먼저 입력해야 합니다.');
+    if(con)con.style.display=cid?'':'none';if(dis)dis.style.display='none';if(push)push.disabled=true;if(pull)pull.disabled=true;
+  }
 }
 function gdConnect(){
   const cid=gdCid(); if(!cid){toast('Client ID를 먼저 입력해주세요',true);return;}
-  if(typeof google==='undefined'){toast('Google 라이브러리 로딩 중... 잠시 후 다시 시도해주세요');return;}
-  const client=google.accounts.oauth2.initTokenClient({client_id:cid,scope:GD_SCOPE,callback:(r)=>{if(r.error){toast('Drive 연결 실패: '+r.error);return;}gdSaveTok(r.access_token,r.expires_in);toast('✅ Google Drive 연결 완료!');gdRefUI();}});
+  if(typeof google==='undefined' || !google.accounts || !google.accounts.oauth2){toast('Google 라이브러리 로딩 중... 잠시 후 다시 시도해주세요');return;}
+  const client=google.accounts.oauth2.initTokenClient({client_id:cid,scope:GD_SCOPE,callback:(r)=>{if(r.error){toast('Drive 연결 실패: '+r.error,true);gdLog('Drive 연결 실패: '+r.error,true);return;}gdSaveTok(r.access_token,r.expires_in);toast('✅ Google Drive 연결 완료!');gdRefUI();}});
   client.requestAccessToken({prompt:'consent'});
 }
-async function gdGetTok(){const exp=parseInt(localStorage.getItem('gd_tok_exp')||'0');if(_gdToken&&Date.now()<exp)return _gdToken;const stored=gdLoadTok();if(stored)return stored;return null;}
+async function gdSilentRefresh(){
+  const cid=gdCid();
+  if(!cid || typeof google==='undefined' || !google.accounts || !google.accounts.oauth2) return null;
+  return await new Promise(resolve=>{
+    try{
+      const client=google.accounts.oauth2.initTokenClient({client_id:cid,scope:GD_SCOPE,callback:(r)=>{if(r && !r.error && r.access_token){gdSaveTok(r.access_token,r.expires_in);gdRefUI();resolve(r.access_token);}else resolve(null);}});
+      client.requestAccessToken({prompt:''});
+    }catch(_){resolve(null);}
+  });
+}
+async function gdGetTok(){
+  const exp=parseInt(localStorage.getItem('gd_tok_exp')||'0');
+  if(_gdToken&&Date.now()<exp) return _gdToken;
+  const stored=gdLoadTok(); if(stored) return stored;
+  return await gdSilentRefresh();
+}
+function gdToggleAuto(on){localStorage.setItem('gd_auto',on?'1':'0');gdLog(on?'자동 Drive 저장 켜짐 (30초 지연)':'자동 Drive 저장 꺼짐');}
+function queueAutoDriveSave(){
+  if(localStorage.getItem('gd_auto')!=='1') return;
+  clearTimeout(_gdAutoTimer);
+  _gdAutoTimer=setTimeout(()=>{if(dirty)gdPush(true);},30000);
+}
 async function gdApi(method,url,token,body,ct){
   const h={'Authorization':'Bearer '+token};if(ct)h['Content-Type']=ct;
   const r=await fetch(url,{method,headers:h,body});
-  if(r.status===401){_gdToken=null;localStorage.removeItem('gd_tok');gdRefUI();throw new Error('토큰 만료. 다시 연결해주세요.');}
-  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||r.status);}
+  if(r.status===401){_gdToken=null;localStorage.removeItem('gd_tok');localStorage.removeItem('gd_tok_exp');gdRefUI();throw new Error('토큰 만료. 다시 연결해주세요.');}
+  if(!r.ok){let msg=r.status; try{const e=await r.json(); msg=e.error?.message||msg;}catch(_){} throw new Error(msg);}
   const ctype=r.headers.get('Content-Type')||'';
   if(ctype.includes('json'))return r.json();return r.text();
 }
 async function gdFind(token,fname){const r=await gdApi('GET',`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`name='${fname}' and trashed=false`)}&fields=files(id,name)`,token);return r.files?.[0]||null;}
-async function gdPush(){
-  const token=await gdGetTok();if(!token){toast('먼저 Google 계정을 연결해주세요');return;}
+async function gdPush(silentToast=false){
+  saveAll(true);
+  const token=await gdGetTok();if(!token){if(!silentToast)toast('먼저 Google 계정을 연결해주세요');gdLog('Drive 저장 전 Google 계정 연결이 필요합니다.',true);return;}
   if(_gdBusy)return;_gdBusy=true;
   try{
-    saveAll();
-    const payload=JSON.stringify(DB);
+    const payload=localStorage.getItem(LS_MAIN_KEY)||JSON.stringify(DB);
     const existing=await gdFind(token,GD_FNAME);
     const boundary='---hdb_b';const meta=JSON.stringify({name:GD_FNAME,mimeType:'application/json'});
-    const body=`--${boundary}\r\nContent-Type: application/json\r\n\r\n${meta}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${payload}\r\n--${boundary}--`;
+    const body=`--${boundary}
+Content-Type: application/json
+
+${meta}
+--${boundary}
+Content-Type: application/json
+
+${payload}
+--${boundary}--`;
     const url=existing?`https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=multipart`:`https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
     await gdApi(existing?'PATCH':'POST',url,token,body,`multipart/related; boundary=${boundary}`);
     localStorage.setItem('gd_last',new Date().toISOString());
-    toast('☁ Google Drive에 저장 완료!');gdRefUI();
-  }catch(e){toast('Drive 저장 실패: '+e.message);}
+    gdRefUI();
+    updateStorageInfo();
+    if(!silentToast) toast('☁ Google Drive에 저장 완료!');
+  }catch(e){gdLog('Drive 저장 실패: '+e.message,true);if(!silentToast)toast('Drive 저장 실패: '+e.message,true);}
   _gdBusy=false;
 }
 async function gdPull(){
-  const token=await gdGetTok();if(!token){toast('먼저 Google 계정을 연결해주세요');return;}
+  const token=await gdGetTok();if(!token){toast('먼저 Google 계정을 연결해주세요');gdLog('Drive 불러오기 전 Google 계정 연결이 필요합니다.',true);return;}
   if(!confirm('Google Drive의 데이터로 현재 데이터를 덮어씁니다. 계속할까요?'))return;
   try{
     const existing=await gdFind(token,GD_FNAME);if(!existing){toast('Drive에 저장된 데이터가 없어요');return;}
     const text=await gdApi('GET',`https://www.googleapis.com/drive/v3/files/${existing.id}?alt=media`,token);
     const d=typeof text==='string'?JSON.parse(text):text;
-    DB={...DB,...d};localStorage.setItem('hdb',JSON.stringify(DB));location.reload();
-  }catch(e){toast('Drive 불러오기 실패: '+e.message);}
+    DB={...DB,...d};
+    const payload=JSON.stringify(DB);
+    saveLocalCopies(payload);
+    localStorage.setItem('gd_last',new Date().toISOString());
+    location.reload();
+  }catch(e){gdLog('Drive 불러오기 실패: '+e.message,true);toast('Drive 불러오기 실패: '+e.message,true);}
 }
 function gdDisconnect(){if(!confirm('Google Drive 연결을 해제할까요?'))return;_gdToken=null;localStorage.removeItem('gd_tok');localStorage.removeItem('gd_tok_exp');gdRefUI();toast('Drive 연결 해제됨');}
 
 // ════════════════════════════════
 // 저장 / 불러오기
 // ════════════════════════════════
-function markDirty(){dirty=true;document.getElementById('sind').classList.add('dirty');document.getElementById('stxt').textContent='저장 안 됨';}
+function markDirty(){dirty=true;document.getElementById('sind').classList.add('dirty');document.getElementById('stxt').textContent='저장 안 됨';queueAutoDriveSave();}
 function clearDirty(){dirty=false;document.getElementById('sind').classList.remove('dirty');document.getElementById('stxt').textContent='저장됨';}
 
 function collectData(){
@@ -14738,15 +14855,18 @@ function collectData(){
   };
 }
 
-function saveAll(){
+function saveAll(silent=false){
   collectData();
-  localStorage.setItem('hdb',JSON.stringify(DB));
+  const payload=JSON.stringify(DB);
+  saveLocalCopies(payload);
   clearDirty();
-  toast('💾 저장되었어요');
+  refreshLocalBackupUI();
+  updateStorageInfo();
+  if(!silent) toast('💾 저장되었어요');
 }
 
 function loadFromLS(){
-  const raw=localStorage.getItem('hdb'); if(!raw)return;
+  const raw=localStorage.getItem(LS_MAIN_KEY)||localStorage.getItem(LS_BACKUP_KEY)||localStorage.getItem('hdb'); if(!raw)return;
   try{
     const s=JSON.parse(raw); DB={...DB,...s};
     const hy=DB.haeyoung||{}, hs=DB.hyunsoo||{};
@@ -14997,7 +15117,7 @@ function exportData(){
 function importData(inp){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();r.onload=e=>{
-    try{const d=JSON.parse(e.target.result);if(!confirm('현재 데이터를 덮어쓸까요?'))return;DB=d;localStorage.setItem('hdb',JSON.stringify(DB));location.reload();}
+    try{const d=JSON.parse(e.target.result);if(!confirm('현재 데이터를 덮어쓸까요?'))return;DB=d;saveLocalCopies(JSON.stringify(DB));updateStorageInfo();location.reload();}
     catch(err){toast('파일 읽기 실패: '+err.message);}
   };r.readAsText(f);
 }
