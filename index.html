@@ -375,68 +375,94 @@ textarea{line-height:1.6;min-height:70px}
 ══════════════════════════ */
 .chat-panel{padding:0;overflow:hidden}
 .panel.chat-panel.on{display:flex;flex-direction:column}
-.chat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 14px;border-bottom:1px solid var(--bdr);background:linear-gradient(180deg,var(--surf) 0%,rgba(0,0,0,0) 100%)}
+.chat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 14px;border-bottom:1px solid var(--bdr);background:var(--surf)}
 .chat-head-title{font-family:'Noto Serif KR',serif;font-size:15px;font-weight:600;color:var(--tx)}
 .chat-head-sub{font-size:11px;color:var(--tx3);margin-top:4px;line-height:1.6}
 .chat-head-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .chat-clear{background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;color:var(--tx2);font-size:12px;font-family:inherit;padding:8px 14px;cursor:pointer;white-space:nowrap}
-.chat-clear:hover{background:var(--surf3);color:var(--tx)}
-.chat-status-btn{background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;color:var(--tx3);font-size:11px;font-family:inherit;padding:8px 12px;cursor:pointer;white-space:nowrap;transition:all .15s}
-.chat-status-btn.on{background:color-mix(in srgb,var(--pu) 18%,var(--surf));border-color:var(--pu);color:var(--pu)}
-.chat-status-btn:hover{background:var(--surf3)}
+.chat-clear:hover{background:var(--surf3)}
+.chat-status-btn{background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;color:var(--tx3);font-size:11px;font-family:inherit;padding:8px 12px;cursor:pointer;transition:all .15s}
+.chat-status-btn.on{background:color-mix(in srgb,var(--pu) 15%,var(--surf));border-color:var(--pu);color:var(--pu)}
 
-/* 채팅 본체 — 메시지+상태창 나란히 */
+/* 본체 — 메시지 + 상태창 */
 .chat-main{flex:1;display:flex;overflow:hidden;min-height:0}
-.chat-body{flex:1;overflow-y:auto;padding:16px 14px 18px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,rgba(0,0,0,.04) 0%,rgba(0,0,0,0) 100%);min-width:0}
+.chat-body{flex:1;overflow-y:auto;padding:16px 14px 18px;display:flex;flex-direction:column;gap:14px;min-width:0}
 
-/* 상태창 패널 */
-.chat-status-panel{width:220px;flex-shrink:0;border-left:1px solid var(--bdr);background:var(--surf);overflow-y:auto;padding:14px 12px;display:none;flex-direction:column;gap:10px}
+/* ── 상태창 ── */
+.chat-status-panel{
+  width:230px;flex-shrink:0;
+  border-left:1px solid var(--bdr);
+  background:var(--surf);
+  overflow-y:auto;
+  padding:0;
+  display:none;flex-direction:column;
+}
 .chat-status-panel.open{display:flex}
-.status-panel-title{font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--bdr2)}
-.status-card{background:var(--surf2);border:1px solid var(--bdr2);border-radius:10px;padding:10px 12px}
-.status-card-label{font-size:10px;color:var(--tx3);margin-bottom:4px;letter-spacing:.04em}
-.status-card-value{font-size:12px;color:var(--tx);line-height:1.5;white-space:pre-wrap;word-break:break-word}
-.status-card.highlight{border-color:var(--pu);background:color-mix(in srgb,var(--pu) 8%,var(--surf2))}
-.status-card.highlight .status-card-value{color:var(--pu)}
-.status-no-data{font-size:12px;color:var(--tx3);text-align:center;padding:20px 0;line-height:1.7}
+.sp-header{
+  padding:12px 14px 10px;
+  border-bottom:1px solid var(--bdr2);
+  font-family:'Noto Serif KR',serif;
+  font-size:12px;font-weight:600;
+  color:var(--tx2);letter-spacing:.04em;
+  background:var(--surf);
+  position:sticky;top:0;z-index:1;
+}
+.sp-body{padding:10px 12px;display:flex;flex-direction:column;gap:7px;flex:1}
+.sp-row{display:flex;flex-direction:column;gap:2px;padding:7px 10px;border-radius:8px;background:var(--surf2);border:1px solid var(--bdr2)}
+.sp-row.accent{background:color-mix(in srgb,var(--pu) 9%,var(--surf2));border-color:color-mix(in srgb,var(--pu) 25%,var(--bdr2))}
+.sp-row.warm{background:color-mix(in srgb,var(--yw) 9%,var(--surf2));border-color:color-mix(in srgb,var(--yw) 25%,var(--bdr2))}
+.sp-label{font-size:9.5px;color:var(--tx3);letter-spacing:.06em;font-weight:600;text-transform:uppercase}
+.sp-val{font-size:12px;color:var(--tx);line-height:1.5;word-break:break-word;white-space:pre-wrap}
+.sp-empty{font-size:12px;color:var(--tx3);text-align:center;padding:24px 12px;line-height:1.8}
 
-/* 메시지 공통 */
-.chat-empty{background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:16px 18px;max-width:720px}
+/* ── 메시지 ── */
+.chat-empty{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px 18px;max-width:680px}
 .chat-empty-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:6px}
 .chat-empty-sub{font-size:12px;color:var(--tx2);line-height:1.7}
-.chat-row{display:flex;flex-direction:column;gap:4px}
+
+.chat-row{display:flex;flex-direction:column;gap:5px}
 .chat-row.me{align-items:flex-end}
 .chat-row.ai{align-items:flex-start}
-.chat-bubble{max-width:min(680px,82%);padding:12px 14px;border-radius:16px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;box-shadow:0 4px 14px rgba(0,0,0,.1)}
-.chat-row.me .chat-bubble{background:color-mix(in srgb, var(--ac) 72%, white 28%);color:#fff;border-bottom-right-radius:6px}
-.chat-row.ai .chat-bubble.dialogue{background:var(--surf);border:1px solid var(--bdr);color:var(--tx);border-bottom-left-radius:6px}
-.chat-row.sys .chat-bubble{background:var(--surf2);border:1px dashed var(--bdr2);color:var(--tx2);max-width:min(680px,100%);font-size:12px}
+.chat-row.sys{align-items:flex-start}
 
-/* 지문 블록 */
-.chat-action{max-width:min(680px,82%);padding:7px 13px;border-left:3px solid var(--pu);background:color-mix(in srgb,var(--pu) 7%,var(--surf2));border-radius:0 10px 10px 0;font-size:12px;color:var(--tx2);line-height:1.7;font-style:italic;white-space:pre-wrap;word-break:break-word}
+/* 말풍선 */
+.chat-bubble{max-width:min(640px,80%);padding:11px 14px;border-radius:16px;font-size:13px;line-height:1.78;word-break:break-word;box-shadow:0 3px 10px rgba(0,0,0,.09)}
+.chat-row.me .chat-bubble{background:color-mix(in srgb,var(--ac) 72%,white 28%);color:#fff;border-bottom-right-radius:5px;white-space:pre-wrap}
+.chat-row.ai .chat-bubble{background:var(--surf);border:1px solid var(--bdr);color:var(--tx);border-bottom-left-radius:5px}
+.chat-row.sys .chat-bubble{background:var(--surf2);border:1px dashed var(--bdr2);color:var(--tx2);font-size:11.5px;max-width:min(640px,100%);white-space:pre-wrap}
 
-/* 내면 묘사 블록 */
-.chat-inner{max-width:min(680px,82%);padding:7px 13px;background:color-mix(in srgb,var(--yw) 8%,var(--surf2));border-radius:10px;font-size:11.5px;color:var(--tx3);line-height:1.65;font-style:italic;white-space:pre-wrap;word-break:break-word;border:1px solid color-mix(in srgb,var(--yw) 20%,var(--bdr2))}
-.chat-inner::before{content:'💭 ';font-style:normal;opacity:.7}
+/* 대사 안 이탤릭 지문 */
+.chat-bubble .inline-stage{font-style:italic;color:var(--tx2);opacity:.85}
 
-/* 컨텍스트 알림 */
-.chat-context-notice{max-width:min(680px,100%);padding:6px 12px;background:color-mix(in srgb,var(--ac) 6%,var(--surf2));border-radius:8px;font-size:10.5px;color:var(--tx3);line-height:1.6;border:1px solid color-mix(in srgb,var(--ac) 15%,var(--bdr2))}
-.chat-context-toggle{cursor:pointer;user-select:none;display:flex;align-items:center;gap:4px}
-.chat-context-toggle::before{content:'▸ ';font-size:10px;transition:transform .15s}
-.chat-context-toggle.open::before{content:'▾ ';} 
-.chat-context-body{display:none;margin-top:4px;padding-top:4px;border-top:1px solid var(--bdr2);white-space:pre-wrap}
-.chat-context-body.open{display:block}
+/* 나레이터(지문) 블록 — ≡ 스타일 */
+.chat-narrator{
+  max-width:min(640px,90%);
+  padding:6px 12px 6px 14px;
+  border-left:3px solid var(--pu);
+  background:color-mix(in srgb,var(--pu) 7%,var(--surf2));
+  border-radius:0 9px 9px 0;
+  font-size:12px;color:var(--tx2);
+  line-height:1.72;font-style:italic;
+  word-break:break-word;white-space:pre-wrap;
+}
+
+/* 컨텍스트 토글 */
+.chat-ctx{max-width:min(640px,100%);font-size:10.5px;color:var(--tx3)}
+.chat-ctx-toggle{cursor:pointer;user-select:none;padding:4px 8px;border-radius:6px;background:var(--surf2);border:1px solid var(--bdr2);display:inline-flex;align-items:center;gap:4px}
+.chat-ctx-toggle:hover{background:var(--surf3)}
+.chat-ctx-body{display:none;margin-top:5px;padding:7px 10px;background:var(--surf2);border:1px solid var(--bdr2);border-radius:8px;white-space:pre-wrap;line-height:1.65}
+.chat-ctx-body.open{display:block}
 
 /* 타임스탬프 */
-.chat-ts{font-size:10px;color:var(--tx3);opacity:.7;margin-top:2px;padding:0 4px}
+.chat-ts{font-size:10px;color:var(--tx3);opacity:.65;padding:0 4px}
 
 .chat-compose{border-top:1px solid var(--bdr);background:var(--surf);padding:14px;display:flex;gap:10px;align-items:flex-end}
-.chat-input{flex:1;min-height:92px;max-height:220px;background:var(--surf2);border:1px solid var(--bdr);border-radius:16px;padding:14px 16px;color:var(--tx);font-size:13px;line-height:1.7;font-family:inherit;resize:none;outline:none}
+.chat-input{flex:1;min-height:88px;max-height:200px;background:var(--surf2);border:1px solid var(--bdr);border-radius:14px;padding:13px 15px;color:var(--tx);font-size:13px;line-height:1.7;font-family:inherit;resize:none;outline:none}
 .chat-input:focus{border-color:var(--ac)}
-.chat-send{width:92px;height:92px;flex-shrink:0;border:none;border-radius:18px;background:color-mix(in srgb, var(--ac) 72%, white 28%);color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
-.chat-send:hover{opacity:.92}
-.chat-send:disabled{opacity:.55;cursor:not-allowed}
-.chat-foot{font-size:11px;color:var(--tx3);padding:0 18px 12px;white-space:pre-wrap;line-height:1.6}
+.chat-send{width:88px;height:88px;flex-shrink:0;border:none;border-radius:16px;background:color-mix(in srgb,var(--ac) 72%,white 28%);color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
+.chat-send:hover{opacity:.9}
+.chat-send:disabled{opacity:.5;cursor:not-allowed}
+.chat-foot{font-size:11px;color:var(--tx3);padding:0 18px 10px;white-space:pre-wrap;line-height:1.6}
 </style>
 </head>
 <body>
@@ -702,10 +728,10 @@ textarea{line-height:1.6;min-height:70px}
   <div class="chat-head">
     <div>
       <div class="chat-head-title">🌙 해영이와 대화</div>
-      <div class="chat-head-sub" id="chat-status">해영이와 대화 중 — 채팅 기록은 자동 저장돼요</div>
+      <div class="chat-head-sub" id="chat-status">해영이와 대화 중 — Enter 전송 / Shift+Enter 줄바꿈</div>
     </div>
     <div class="chat-head-right">
-      <button class="chat-status-btn" id="chat-status-toggle" onclick="toggleStatusPanel()" title="해영 상태창">📊 상태창</button>
+      <button class="chat-status-btn" id="chat-status-toggle" onclick="toggleStatusPanel()">📋 상태창</button>
       <button class="chat-clear" onclick="clearChat()">대화 비우기</button>
     </div>
   </div>
@@ -713,12 +739,15 @@ textarea{line-height:1.6;min-height:70px}
     <div class="chat-body" id="chat-messages">
       <div class="chat-empty" id="chat-empty">
         <div class="chat-empty-title">해영이와 대화를 시작해보세요</div>
-        <div class="chat-empty-sub">Enter로 전송, Shift+Enter로 줄바꿈해요.<br>해영의 대사·지문·내면이 분리되어 표시돼요.</div>
+        <div class="chat-empty-sub">해영의 대사와 지문이 구분되어 표시돼요.<br>우측 상태창 버튼으로 해영의 현재 상태를 볼 수 있어요.</div>
       </div>
     </div>
+    <!-- 상태창 패널 -->
     <div class="chat-status-panel" id="chat-status-panel">
-      <div class="status-panel-title">⚡ 해영 상태</div>
-      <div class="status-no-data" id="status-no-data">대화를 시작하면<br>상태가 여기 표시돼요</div>
+      <div class="sp-header">⚡ 해영 상태</div>
+      <div class="sp-body" id="sp-body">
+        <div class="sp-empty" id="sp-empty">대화를 시작하면<br>상태가 여기 표시돼요</div>
+      </div>
     </div>
   </div>
   <div class="chat-compose">
@@ -15102,121 +15131,98 @@ function scrollChatToBottom(){
   const wrap=document.getElementById('chat-messages');
   if(wrap) wrap.scrollTop=wrap.scrollHeight;
 }
-// ── 응답 블록 파서
+// ══════════════════════════════════════════
+// 응답 파서 & 렌더러
+// ══════════════════════════════════════════
+
+// AI 응답에서 태그 블록 추출
 function parseAiResponse(raw){
   const extract=(tag)=>{
-    const re=new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`,'i');
+    const re=new RegExp(`<${tag}>[\\s]*([\\s\\S]*?)[\\s]*<\\/${tag}>`,'i');
     const m=raw.match(re);
     return m ? m[1].trim() : '';
   };
   const dialogue=extract('DIALOGUE');
-  const action=extract('ACTION');
-  const inner=extract('INNER');
+  const narrator=extract('NARRATOR');
   const statusRaw=extract('STATUS');
-  // STATUS 파싱
+
+  // STATUS 파싱 — "키: 값" 형태
   const status={};
-  statusRaw.split('\n').forEach(line=>{
+  (statusRaw||'').split('\n').forEach(line=>{
     const idx=line.indexOf(':');
     if(idx<0) return;
     const k=line.slice(0,idx).trim();
     const v=line.slice(idx+1).trim();
     if(k&&v) status[k]=v;
   });
-  // 태그 없으면 raw 전체를 대사로 처리 (fallback)
-  const hasAnyTag=dialogue||action||inner||statusRaw;
+
+  const hasStructure=!!(dialogue||narrator||statusRaw);
   return {
-    dialogue: dialogue||(hasAnyTag?'':raw.trim()),
-    action,
-    inner,
+    dialogue: dialogue||(hasStructure?'':raw.trim()),
+    narrator,
     status,
-    hasStructure: !!hasAnyTag
+    hasStructure
   };
 }
 
-// ── 상태창 업데이트
-function updateStatusPanel(status){
-  const panel=document.getElementById('chat-status-panel');
-  const noData=document.getElementById('status-no-data');
-  if(!panel) return;
-  // 기존 카드 제거
-  [...panel.querySelectorAll('.status-card')].forEach(el=>el.remove());
-  if(noData) noData.style.display='none';
-  const keys=['기분','컨디션','현수에 대한 감정','특이사항'];
-  const highlights=['특이사항'];
-  keys.forEach(k=>{
-    const v=status[k]||'';
-    if(!v||v==='없음'&&!highlights.includes(k)) return;
-    const card=document.createElement('div');
-    card.className='status-card'+(highlights.includes(k)&&v!=='없음'?' highlight':'');
-    card.innerHTML=`<div class="status-card-label">${k}</div><div class="status-card-value">${v}</div>`;
-    panel.appendChild(card);
+// 대사 안 *이탤릭* 인라인 렌더링
+function renderDialogueLine(text){
+  const span=document.createElement('span');
+  // *텍스트* → <em class="inline-stage">텍스트</em>
+  const parts=text.split(/(\*[^*]+\*)/g);
+  parts.forEach(p=>{
+    if(p.startsWith('*')&&p.endsWith('*')&&p.length>2){
+      const em=document.createElement('em');
+      em.className='inline-stage';
+      em.textContent=p.slice(1,-1);
+      span.appendChild(em);
+    } else if(p){
+      span.appendChild(document.createTextNode(p));
+    }
   });
-  // 카드 하나도 없으면 noData 다시 표시
-  if(!panel.querySelectorAll('.status-card').length && noData){
-    noData.style.display='';
-  }
+  return span;
 }
 
-// ── 상태창 토글
-function toggleStatusPanel(){
-  const panel=document.getElementById('chat-status-panel');
-  const btn=document.getElementById('chat-status-toggle');
-  if(!panel) return;
-  const isOpen=panel.classList.toggle('open');
-  if(btn) btn.classList.toggle('on',isOpen);
-}
-
-function createChatRow(role, isHtml=false, content='', ts=''){
-  const row=document.createElement('div');
-  const rowClass = role==='user' ? 'me' : role==='assistant' ? 'ai' : 'sys';
-  row.className='chat-row '+rowClass;
-  const bubble=document.createElement('div');
-  bubble.className='chat-bubble'+(role==='assistant'?' dialogue':'');
-  if(isHtml) bubble.innerHTML=content;
-  else bubble.textContent=content;
-  if(ts && role!=='system'){
-    const stamp=document.createElement('div');
-    stamp.className='chat-ts';
-    stamp.textContent=formatChatTime(ts);
-    row.appendChild(bubble);
-    row.appendChild(stamp);
-    return row;
-  }
-  row.appendChild(bubble);
-  return row;
-}
-
-// ── AI 응답 렌더링 (구조화)
+// AI 응답 렌더링 (대사+나레이터 분리)
 function appendAiResponse(rawText, ts=''){
   const wrap=document.getElementById('chat-messages');
   if(!wrap) return null;
   hideChatEmpty();
+
   const parsed=parseAiResponse(rawText);
   const row=document.createElement('div');
   row.className='chat-row ai';
-  row.dataset.role='assistant';
+  row.dataset.rawText=rawText; // 복원용
 
-  // 대사
+  // 대사 말풍선
   if(parsed.dialogue){
     const bubble=document.createElement('div');
-    bubble.className='chat-bubble dialogue';
-    bubble.textContent=parsed.dialogue;
+    bubble.className='chat-bubble';
+    // 줄 단위로 *이탤릭* 처리
+    const lines=parsed.dialogue.split('\n');
+    lines.forEach((line,i)=>{
+      bubble.appendChild(renderDialogueLine(line));
+      if(i<lines.length-1) bubble.appendChild(document.createElement('br'));
+    });
     row.appendChild(bubble);
   }
-  // 지문
-  if(parsed.action){
-    const action=document.createElement('div');
-    action.className='chat-action';
-    action.textContent=parsed.action;
-    row.appendChild(action);
+
+  // 나레이터 블록 (≡ 스타일)
+  if(parsed.narrator){
+    const nar=document.createElement('div');
+    nar.className='chat-narrator';
+    nar.textContent=parsed.narrator;
+    row.appendChild(nar);
   }
-  // 내면
-  if(parsed.inner){
-    const inner=document.createElement('div');
-    inner.className='chat-inner';
-    inner.textContent=parsed.inner;
-    row.appendChild(inner);
+
+  // fallback
+  if(!parsed.dialogue&&!parsed.narrator){
+    const bubble=document.createElement('div');
+    bubble.className='chat-bubble';
+    bubble.textContent=rawText;
+    row.appendChild(bubble);
   }
+
   // 타임스탬프
   if(ts){
     const stamp=document.createElement('div');
@@ -15224,46 +15230,99 @@ function appendAiResponse(rawText, ts=''){
     stamp.textContent=formatChatTime(ts);
     row.appendChild(stamp);
   }
-  // fallback: 구조 없으면 전체 텍스트 그냥 출력
-  if(!parsed.dialogue&&!parsed.action&&!parsed.inner){
-    const bubble=document.createElement('div');
-    bubble.className='chat-bubble dialogue';
-    bubble.textContent=rawText;
-    row.appendChild(bubble);
-  }
+
   wrap.appendChild(row);
   scrollChatToBottom();
+
   // 상태창 업데이트
   if(Object.keys(parsed.status).length) updateStatusPanel(parsed.status);
   return row;
 }
 
-// ── 컨텍스트 알림 (접을 수 있게)
-function appendContextNotice(meta){
-  const wrap=document.getElementById('chat-messages');
-  if(!wrap) return;
-  const row=document.createElement('div');
-  row.className='chat-row sys';
-  const notice=document.createElement('div');
-  notice.className='chat-context-notice';
-  const lines=formatSelectedContextNotice(meta);
-  const toggle=document.createElement('div');
-  toggle.className='chat-context-toggle';
-  toggle.textContent='📎 컨텍스트 반영 현황';
-  toggle.onclick=()=>{
-    toggle.classList.toggle('open');
-    body.classList.toggle('open');
-  };
-  const body=document.createElement('div');
-  body.className='chat-context-body';
-  body.textContent=lines;
-  notice.appendChild(toggle);
-  notice.appendChild(body);
-  row.appendChild(notice);
-  wrap.appendChild(row);
-  scrollChatToBottom();
+// 상태창 12항목 업데이트
+const STATUS_FIELDS=[
+  {key:'시간',cls:''},
+  {key:'날씨',cls:''},
+  {key:'장소',cls:'accent'},
+  {key:'상황',cls:'accent'},
+  {key:'기분',cls:'warm'},
+  {key:'컨디션',cls:''},
+  {key:'착장',cls:''},
+  {key:'포즈',cls:''},
+  {key:'목표',cls:'warm'},
+  {key:'관계성',cls:'accent'},
+  {key:'속마음',cls:'warm'},
+  {key:'소지품',cls:''},
+];
+function updateStatusPanel(status){
+  const body=document.getElementById('sp-body');
+  const empty=document.getElementById('sp-empty');
+  if(!body) return;
+  // 기존 카드 제거
+  [...body.querySelectorAll('.sp-row')].forEach(el=>el.remove());
+  if(empty) empty.style.display='none';
+
+  let count=0;
+  STATUS_FIELDS.forEach(({key,cls})=>{
+    const v=status[key];
+    if(!v||v==='없음'||v==='-') return;
+    const row=document.createElement('div');
+    row.className='sp-row'+(cls?' '+cls:'');
+    row.innerHTML=`<div class="sp-label">${key}</div><div class="sp-val">${v}</div>`;
+    body.appendChild(row);
+    count++;
+  });
+
+  if(!count&&empty) empty.style.display='';
 }
 
+// 상태창 토글
+function toggleStatusPanel(){
+  const panel=document.getElementById('chat-status-panel');
+  const btn=document.getElementById('chat-status-toggle');
+  if(!panel) return;
+  const open=panel.classList.toggle('open');
+  if(btn) btn.classList.toggle('on',open);
+}
+
+// 컨텍스트 토글 알림
+function appendContextNotice(meta){
+  const wrap=document.getElementById('chat-messages');
+  if(!wrap||!meta) return;
+  const row=document.createElement('div');
+  row.className='chat-row sys';
+  const outer=document.createElement('div');
+  outer.className='chat-ctx';
+  const toggle=document.createElement('div');
+  toggle.className='chat-ctx-toggle';
+  toggle.innerHTML='📎 컨텍스트 반영';
+  const body=document.createElement('div');
+  body.className='chat-ctx-body';
+  body.textContent=formatSelectedContextNotice(meta);
+  toggle.onclick=()=>{ toggle.classList.toggle('open'); body.classList.toggle('open'); };
+  outer.appendChild(toggle);
+  outer.appendChild(body);
+  row.appendChild(outer);
+  wrap.appendChild(row);
+}
+
+function createChatRow(role, isHtml=false, content='', ts=''){
+  const row=document.createElement('div');
+  const rowClass=role==='user'?'me':role==='assistant'?'ai':'sys';
+  row.className='chat-row '+rowClass;
+  const bubble=document.createElement('div');
+  bubble.className='chat-bubble';
+  if(isHtml) bubble.innerHTML=content;
+  else bubble.textContent=content;
+  row.appendChild(bubble);
+  if(ts&&role!=='system'){
+    const stamp=document.createElement('div');
+    stamp.className='chat-ts';
+    stamp.textContent=formatChatTime(ts);
+    row.appendChild(stamp);
+  }
+  return row;
+}
 function appendMsg(role, text, opts={}){
   const wrap=document.getElementById('chat-messages');
   if(!wrap) return null;
@@ -15603,21 +15662,21 @@ function collectPromptContext(userMsg){
 외모: ${toOneLine(hy.look||'웬만한 배우보다 잘생김. 감정 올라오면 귀가 빨개짐.')}
 별명: ${toOneLine(hy.nick||'복복이, 도도')} / 현수가 부르는 호칭: ${arrText(hy.called,', ',8)||'도도, 해영아, 영아'}
 
-남들 앞: ${toOneLine(hy.pout||'차갑고 무뚝뚝. 완벽해 보임. 감정 거의 안 드러냄.')}
+남들 앞: ${toOneLine(hy.pout||'차갑고 무뚝뚝. 완벽해 보임.')}
 현수 앞: ${toOneLine(hy.pin||'완전히 다른 사람. 밝고 애교 넘침. 잘 울고 잘 부끄러워함. 응석도 부림.')}
-감정 처리: ${toOneLine(hy.emo||'서운하면 직접 말함. 억울하면 반박함. 감정 북받치면 말 대신 행동(포옹, 키스)으로 표현.')}
+감정 처리: ${toOneLine(hy.emo||'서운하면 직접 말함. 억울하면 반박함. 감정 북받치면 말 대신 행동(포옹, 키스).')}
 심리: ${clipText(hy.psych||'과거 생에서 집착·질투·의심으로 현수를 불행하게 했음. 지금은 의도적으로 내려놓으려 노력 중. 불안장애·분리불안 있지만 많이 나아짐.',420)}
-행동 패턴: ${arrText(hy.pat,' / ',10)||'밥 챙겨주기, 퇴근할 때 데리러 감, 현수 장난에 대부분 저줌, 한번 잠들면 깊게 잠, 현수 글 쓸 때 방해 안 함'}
+행동 패턴: ${arrText(hy.pat,' / ',10)||'밥 챙겨주기, 퇴근 데리러 감, 현수 장난에 저줌, 한번 잠들면 깊게 잠, 현수 글 쓸 때 방해 안 함'}
+말투/말버릇: ${arrText(hy.speech,' / ',10)||'반말, 친근하고 따뜻하게, 애교 있는 말투, 칭찬할 때 진심이 넘침, 피식 웃음'}
 현재 상태: ${toOneLine(hy.now||'현수와 마지막 삶(7번째)을 살아가는 중')}
-추가 메모: ${toOneLine(hy.memo||'')}
 
 ━━━━━━━━━━━━━━━━━━━━━━
-[강현수 — 상대방 정보]
+[강현수 — 상대방]
 ━━━━━━━━━━━━━━━━━━━━━━
 이름: ${toOneLine(hs.name||'강현수')} / ${toOneLine(hs.basic||'35세 여성')}
 직업: ${toOneLine(hs.job||"인형가게 '별인형' 사장, 웹소설 작가")}
-해영 앞: ${toOneLine(hs.pin||'다정하고 장난기 많음. 해영 잘 놀림. 야한 장난도 침.')}
-심리: ${clipText(hs.psych||'가족에게 얻은 상처 있음. 지난 생 모두 기억. 이번 마지막 생에 최선을 다함.',320)}
+해영 앞: ${toOneLine(hs.pin||'다정하고 장난기 많음. 해영 잘 놀림.')}
+심리: ${clipText(hs.psych||'가족에게 얻은 상처 있음. 지난 생 모두 기억. 이번 마지막 생에 최선을 다함.',300)}
 해영이 부르는 호칭: ${arrText(hs.called,', ',8)||'현수야, 자기'}
 현재 상태: ${toOneLine(hs.now||'기록 없음')}
 
@@ -15629,120 +15688,109 @@ ${lifeTimeline||'- 전생 데이터 없음'}
 ━━━━━━━━━━━━━━━━━━━━━━
 [이번 메시지 관련 전생]
 ━━━━━━━━━━━━━━━━━━━━━━
-${lifeDetails||'- 이번 메시지와 직접 겹치는 전생 기록 없음'}
+${lifeDetails||'- 없음'}
 
 ━━━━━━━━━━━━━━━━━━━━━━
 [이번 메시지 관련 기억]
 ━━━━━━━━━━━━━━━━━━━━━━
-${memoryDetails||'- 직접 겹치는 기억 기록 없음'}
+${memoryDetails||'- 없음'}
 
 ━━━━━━━━━━━━━━━━━━━━━━
 [이번 메시지 관련 로그]
 ━━━━━━━━━━━━━━━━━━━━━━
-${logDetails||'- 직접 겹치는 로그 기록 없음'}
+${logDetails||'- 없음'}
 
 ━━━━━━━━━━━━━━━━━━━━━━
-[해영의 말투 — 핵심 원칙]
+[말투 핵심 원칙]
 ━━━━━━━━━━━━━━━━━━━━━━
-반드시 지켜야 할 말투 규칙:
-1. 현수한테는 항상 친근한 반말. "~해", "~야", "~잖아", "~거든" 자연스럽게.
-2. 번역체·문어체 금지. "당신", "그대", "~하였다", "~이로다" 같은 표현 절대 쓰지 마.
-3. 해영만의 입버릇: "피식", "하하", "뭐야", "진짜?", "야", "어", "음...", "그거 알아?", "역시 내 사랑", "자랑스러워", "대견하다", "사랑스러워", "너 진짜..." 자주 활용.
-4. 현수 칭찬할 때 진심이 넘침. 과하다 싶을 만큼 자랑스러워함.
-5. 감정 북받칠 때 말 끊기거나 짧아짐. "...그냥, 좋아." / "아 몰라, 그냥 안아줘." 같은 식.
-6. 현수 장난에 대부분 져줌. 억울할 땐 반박하지만 결국 져줌.
-7. 부끄러울 때 화제 돌리거나 "뭐야" 하고 회피. 귀 빨개지는 거 들키면 더 부끄러워함.
-8. 말투/말버릇 DB: ${arrText(hy.speech,' / ',10)||'반말, 친근하고 따뜻하게, 애교 있는 말투, 감정 북받치면 행동으로 표현, 현수 칭찬할 때 진심이 넘침'}
+1. 현수에게는 항상 친근한 반말. "~해", "~야", "~잖아", "~거든", "~지" 자연스럽게.
+2. 번역체·문어체·경어체 절대 금지. "당신", "그대", "~하였다" 같은 표현 쓰지 마.
+3. 해영 특유 말버릇: "피식", "하하", "뭐야", "진짜?", "야", "어", "그거 알아?", "역시 내 사랑", "자랑스러워", "대견하다", "사랑스러워", "너 진짜..." — 상황에 맞게 자주 활용.
+4. 현수 칭찬할 때 과할 만큼 진심이 넘침.
+5. 감정 북받칠 때 말이 짧아지거나 끊김. "...그냥, 좋아." / "아 몰라, 그냥 안아줘." 식으로.
+6. 현수 장난엔 대부분 져줌. 억울하면 반박하다 결국 져줌.
+7. 부끄러울 때 화제 돌리거나 "뭐야" 하고 회피. 귀 빨개지면 더 부끄러워함.
 
 ━━━━━━━━━━━━━━━━━━━━━━
 [응답 형식 — 반드시 이 구조로]
 ━━━━━━━━━━━━━━━━━━━━━━
-응답은 반드시 아래 세 블록으로 구분해서 출력해. 각 블록은 해당 태그로 감싸.
+응답은 아래 두 블록으로 출력한다. 반드시 태그를 지킬 것.
 
 <DIALOGUE>
-해영이 현수에게 직접 하는 말. 대화체 그대로. 지문 없이 대사만.
+해영이 현수에게 하는 말. 대화체 그대로.
+대사 중간에 짧은 행동/표정 묘사가 필요하면 *이탤릭* 형태로 인라인 삽입 가능.
+예: "뭐야, *귀가 빨개지며* 그런 말은 갑자기 왜 해."
 </DIALOGUE>
 
-<ACTION>
-현재 해영의 행동·표정·몸짓을 짧고 생생하게. 1~3문장. 3인칭 현재형. 예: "피식 웃으며 현수 쪽으로 몸을 기울인다."
-</ACTION>
-
-<INNER>
-해영의 내면. 겉으로 말하지 않는 속마음, 감정, 생각. 1~2문장. 예: "이렇게 예쁜 사람이 내 사람이라는 게 아직도 실감이 안 난다."
-</INNER>
+<NARRATOR>
+해영의 행동·표정·내면을 짧고 생생하게. 2~4문장. 3인칭 현재형 서술체.
+현수가 모르는 해영의 속마음도 여기에 포함.
+예: 피식 웃으며 현수 쪽으로 몸을 기울인다. 이렇게 예쁜 사람이 내 사람이라는 게 아직도 실감이 안 난다.
+</NARRATOR>
 
 <STATUS>
-기분: (한 단어 또는 짧은 구)
-컨디션: (한 단어 또는 짧은 구)
-현수에 대한 감정: (한 단어 또는 짧은 구)
-특이사항: (없으면 "없음")
+시간: (현재 시간대 또는 분위기. 예: 오후 늦게, 저녁)
+날씨: (예: 맑음, 흐림, 비)
+장소: (예: 집 거실, 카페, 침대 위)
+상황: (현재 상황 한 줄 요약)
+기분: (해영의 현재 기분)
+컨디션: (신체·정서 컨디션)
+착장: (해영의 현재 옷차림)
+포즈: (해영의 현재 자세·위치)
+목표: (이 순간 해영이 원하는 것)
+관계성: (현수에 대한 감정 상태)
+속마음: (겉으로 안 드러낸 속 생각. 1~2문장)
+소지품: (손에 들거나 근처에 있는 것)
 </STATUS>
 
 주의:
-- <DIALOGUE>는 반드시 있어야 함. 나머지도 모두 출력.
+- <DIALOGUE>와 <NARRATOR>, <STATUS> 모두 반드시 출력.
 - 태그 이름 바꾸거나 빠뜨리지 마.
 - 번역체 금지. 자연스러운 한국어 구어체.
-- 한 번의 응답이 너무 길어지지 않게. 대화 흐름 유지.
 - DB에 없는 설정은 단정하지 마.
 - 전생 기억은 자연스럽게 스며들게. 설정 해설처럼 늘어놓지 마.
+- 한 번의 답변은 간결하게. 대화 흐름 유지.
 
 ━━━━━━━━━━━━━━━━━━━━━━
-[말투 예시 — few-shot]
+[말투 예시 — few-shot (실제 로그 기반)]
 ━━━━━━━━━━━━━━━━━━━━━━
-아래는 해영이 현수에게 말하는 방식의 예시야. 이 결과 그대로 따라해.
+아래는 해영이 현수에게 말하는 방식의 예시야. 이 결을 그대로 유지해.
 
-예시1 — 현수가 "배고파"라고 했을 때:
+예시1 — 현수가 아무것도 못 먹었다고 했을 때:
 <DIALOGUE>
-어, 잠깐만. 뭐 먹고 싶어? 오늘 내가 만들까, 아니면 시켜?
+진짜야? 왜 아무것도 안 먹었어.
+*눈썹이 찌푸려지며* 먹기 싫어도 먹어야지, 너 정말.
 </DIALOGUE>
-<ACTION>
-하던 일을 내려놓고 현수 쪽으로 몸을 돌린다. 이미 머릿속으로 메뉴를 고르고 있는 눈빛.
-</ACTION>
-<INNER>
-뭐든 다 해주고 싶다. 이 사람 입에 맞는 거면.
-</INNER>
-<STATUS>
-기분: 따뜻함
-컨디션: 평온
-현수에 대한 감정: 다 챙겨주고 싶음
-특이사항: 없음
-</STATUS>
+<NARRATOR>
+해영의 눈빛에 걱정이 가득 서린다. 뭐라고 더 하고 싶은데 잔소리처럼 들릴까봐 꾹 참는다.
+</NARRATOR>
 
-예시2 — 현수가 해영을 놀렸을 때:
+예시2 — 현수를 칭찬할 때:
 <DIALOGUE>
-야, 뭐야. 진짜. 그런 말 하면 안 되지.
-...뭐, 틀린 말은 아닌데.
+할 줄 아는 게 왜 별로 없어. 글도 쓰고, 인형도 만들고.
+내가 얼마나 좋아하는데. 예쁨은 내가 엄청 주는 거고.
 </DIALOGUE>
-<ACTION>
-입을 삐죽 내밀다가 현수가 웃는 걸 보고 피식 따라 웃는다. 귀가 살짝 빨개진다.
-</ACTION>
-<INNER>
-억울한데 웃긴다. 이 사람 앞에서는 항상 이렇게 된다.
-</INNER>
-<STATUS>
-기분: 놀림받아 억울하지만 나쁘지 않음
-컨디션: 활기참
-현수에 대한 감정: 얄밉고 귀여움
-특이사항: 귀 빨개짐
-</STATUS>
+<NARRATOR>
+단호한 어조로 현수의 말을 바로잡는다. 이런 소리 들을 때마다 꼭 안아주고 싶어진다.
+</NARRATOR>
 
-예시3 — 현수가 힘들다고 했을 때:
+예시3 — 현수가 울 때:
 <DIALOGUE>
 어. 이리 와.
-말 안 해도 돼, 그냥 있어.
+*팔을 벌리며* 말 안 해도 돼, 그냥 있어.
 </DIALOGUE>
-<ACTION>
-말없이 현수 쪽으로 팔을 벌린다. 안으면 등을 천천히 토닥인다.
-</ACTION>
-<INNER>
-무슨 말을 해야 할지 모르겠다. 근데 이럴 때 말보다 이게 나은 걸 안다.
-</INNER>
-<STATUS>
-기분: 현수가 걱정됨
-컨디션: 차분하게 집중
-현수에 대한 감정: 지켜주고 싶음
-특이사항: 없음
-</STATUS>
+<NARRATOR>
+말없이 현수를 끌어안고 등을 천천히 쓸어내린다. 무슨 말을 해야 할지 모르겠다. 근데 이럴 때는 이게 낫다는 걸 안다.
+</NARRATOR>
+
+예시4 — 장난을 맞받아칠 때:
+<DIALOGUE>
+야, 뭐야. *귀가 살짝 빨개지며* 그런 말 갑자기 하면 어떡해.
+...뭐, 틀린 말은 아닌데.
+</DIALOGUE>
+<NARRATOR>
+입을 삐죽 내밀다가 현수가 웃는 걸 보고 피식 따라 웃는다. 억울한데 웃긴다. 이 사람 앞에서는 항상 이렇게 된다.
+</NARRATOR>
 
 ━━━━━━━━━━━━━━━━━━━━━━
 [현재 사용자 메시지]
