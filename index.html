@@ -308,7 +308,12 @@ textarea{line-height:1.6;min-height:70px}
 .memgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .memcard{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .15s}
 .memcard:hover{border-color:var(--bdr2);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.memcard.expanded{border-color:var(--ac);transform:none;box-shadow:0 4px 20px rgba(0,0,0,.25)}
 .memhead{display:flex;align-items:flex-start;gap:7px;margin-bottom:6px}
+.memprev{font-size:12px;color:var(--tx2);line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;transition:all .2s}
+.memcard.expanded .memprev{display:block;-webkit-line-clamp:unset;overflow:visible;white-space:pre-wrap;color:var(--tx)}
+.mem-expand-hint{font-size:10.5px;color:var(--tx3);margin-top:4px;text-align:right}
+.memcard.expanded .mem-expand-hint{display:none}
 .memstars{font-size:11px;color:var(--yw);flex-shrink:0;margin-top:1px}
 .memtitle{font-family:'Noto Serif KR',serif;font-size:14px;color:var(--tx);flex:1}
 .memdate{font-size:11px;color:var(--tx3);margin-bottom:5px}
@@ -14638,11 +14643,9 @@ function init(){
   if(cid) document.getElementById('gd-cid').value=cid;
   gdRefUI();
   updateStorageInfo();
-  updateTokenStats(); // G: 설정탭 초기 로드
+  updateTokenStats();
   clearDirty();
   _isBooting = false;
-  // 채팅 탭 진입 시 최신 대화로 자동 스크롤
-  setTimeout(()=>scrollChatToBottom(), 80);
 }
 
 // ════════════════════════════════
@@ -14738,12 +14741,18 @@ function renderMem(){
   mems.forEach(m=>{
     const ri=DB.memories.indexOf(m);
     const stars='★'.repeat(m.importance)+'☆'.repeat(3-m.importance);
+    const isLong=m.content.length>120;
     const c=document.createElement('div'); c.className='memcard';
     c.innerHTML=`<div class="memhead"><div class="memstars">${stars}</div><div class="memtitle">${m.title}</div></div>
     <div class="memdate">📅 ${m.date}</div>
     <div class="memprev">${m.content}</div>
+    ${isLong?'<div class="mem-expand-hint">▾ 클릭해서 전체 보기</div>':''}
     ${m.tags?.length?`<div class="memtags">${m.tags.map(t=>`<span class="memtag">#${t}</span>`).join('')}</div>`:''}
-    <div class="memacts"><button class="btn" style="flex:1;font-size:11px" onclick="openMemMod(${ri})">✏ 수정</button><button class="btn dn" style="font-size:11px" onclick="delMem(${ri})">✕</button></div>`;
+    <div class="memacts"><button class="btn" style="flex:1;font-size:11px" onclick="event.stopPropagation();openMemMod(${ri})">✏ 수정</button><button class="btn dn" style="font-size:11px" onclick="event.stopPropagation();delMem(${ri})">✕</button></div>`;
+    // B-1: 카드 클릭으로 내용 접기/펼치기
+    if(isLong){
+      c.onclick=()=>c.classList.toggle('expanded');
+    }
     g.appendChild(c);
   });
 }
@@ -14779,10 +14788,10 @@ function compressImg(file, maxW, maxH, quality, cb){
         const ratio=Math.min(maxW/w, maxH/h);
         w=Math.round(w*ratio); h=Math.round(h*ratio);
       }
-      const c=document.createElement('canvas');
-      c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      cb(c.toDataURL('image/jpeg', quality));
+      const cv=document.createElement('canvas');
+      cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      cb(cv.toDataURL('image/jpeg', quality));
     };
     img.src=e.target.result;
   };
@@ -14790,21 +14799,41 @@ function compressImg(file, maxW, maxH, quality, cb){
 }
 function handleAlbum(inp){
   const files=[...inp.files];
+  let done=0;
   files.forEach(f=>{
-    // 최대 800x800, 품질 0.7로 압축 (원본 대비 약 10분의 1 이하)
-    compressImg(f, 800, 800, 0.7, compressed=>{
-      DB.album.push({src:compressed, label:f.name.replace(/\.[^.]+$/,''), date:new Date().toLocaleDateString('ko-KR')});
-      renderAlbum(); markDirty();
+    // A-5: 더 강한 압축 (480px, quality 0.55) → localStorage 용량 절약
+    compressImg(f, 480, 480, 0.55, compressed=>{
+      // 용량 체크 (단일 이미지 200KB 초과 시 추가 압축)
+      if(compressed.length > 280000){
+        compressImg(f, 320, 320, 0.45, compressed2=>{
+          DB.album.push({src:compressed2, label:f.name.replace(/\.[^.]+$/,''), date:new Date().toLocaleDateString('ko-KR')});
+          done++;
+          if(done===files.length){ renderAlbum(); markDirty(); saveAll(true); toast(`🖼 ${done}장 추가됐어요`); }
+        });
+      } else {
+        DB.album.push({src:compressed, label:f.name.replace(/\.[^.]+$/,''), date:new Date().toLocaleDateString('ko-KR')});
+        done++;
+        if(done===files.length){ renderAlbum(); markDirty(); saveAll(true); toast(`🖼 ${done}장 추가됐어요`); }
+      }
     });
   });
   inp.value='';
+}
+function renameAlbum(i){
+  const cur=DB.album[i]?.label||'';
+  const v=prompt('이미지 이름 수정:', cur);
+  if(v===null) return;
+  DB.album[i].label=v.trim()||cur;
+  renderAlbum(); markDirty(); saveAll(true);
 }
 function renderAlbum(){
   const g=document.getElementById('albumgrid');
   g.innerHTML='<div class="album-add" onclick="addAlbum()"><div class="album-add-icon">+</div><div class="album-add-txt">이미지 추가</div></div><input type="file" id="album-input" accept="image/*" multiple style="display:none" onchange="handleAlbum(this)">';
   DB.album.forEach((a,i)=>{
     const d=document.createElement('div'); d.className='album-item';
-    d.innerHTML=`<img src="${a.src}" alt="${a.label}" onclick="openLB('${a.src}')"><div class="alabel">${a.label}</div><button onclick="delAlbum(${i})" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;display:none">✕</button>`;
+    d.innerHTML=`<img src="${a.src}" alt="${a.label}" onclick="openLB('${a.src}')">
+      <div class="alabel" title="클릭해서 이름 수정" onclick="event.stopPropagation();renameAlbum(${i})" style="cursor:pointer">${a.label} ✏</div>
+      <button onclick="event.stopPropagation();delAlbum(${i})" style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:12px;display:none">✕</button>`;
     d.onmouseenter=()=>d.querySelector('button').style.display='flex';
     d.onmouseleave=()=>d.querySelector('button').style.display='none';
     g.insertBefore(d,g.firstChild);
@@ -15341,7 +15370,7 @@ function appendAiResponse(rawText, ts=''){
   const toolbar=document.createElement('div');
   toolbar.className='chat-ai-toolbar';
 
-  // 북마크 버튼
+  // 북마크 버튼 (A-2: 현수+해영 쌍 저장, A-3: Map 연동)
   const bkmkBtn=document.createElement('button');
   bkmkBtn.className='chat-bookmark-btn';
   const bkmkTs=ts||new Date().toISOString();
@@ -15350,35 +15379,32 @@ function appendAiResponse(rawText, ts=''){
   bkmkBtn.title=isMarked?'북마크 해제':'북마크 추가';
   if(isMarked) bkmkBtn.classList.add('marked');
   row.dataset.ts=bkmkTs;
+  row.dataset.bookmarked=isMarked?'1':'0';
+  _bkmkBtnMap.set(bkmkTs, bkmkBtn);
   bkmkBtn.onclick=()=>{
     const marked=row.dataset.bookmarked==='1';
+    if(!DB.bookmarks) DB.bookmarks=[];
     if(!marked){
-      if(!DB.bookmarks) DB.bookmarks=[];
-      DB.bookmarks.unshift({ts:bkmkTs, raw:rawText, savedAt:new Date().toISOString()});
-      bkmkBtn.textContent='⭐';
-      bkmkBtn.classList.add('marked');
-      bkmkBtn.title='북마크 해제';
-      row.dataset.bookmarked='1';
+      const userText=getPrevUserText(row);
+      DB.bookmarks.unshift({ts:bkmkTs, raw:rawText, userText, savedAt:new Date().toISOString()});
+      syncBkmkBtn(bkmkTs, true);
       toast('⭐ 북마크됐어요');
     } else {
-      const idx=(DB.bookmarks||[]).findIndex(b=>b.ts===bkmkTs);
+      const idx=DB.bookmarks.findIndex(b=>b.ts===bkmkTs);
       if(idx>=0) DB.bookmarks.splice(idx,1);
-      bkmkBtn.textContent='☆';
-      bkmkBtn.classList.remove('marked');
-      bkmkBtn.title='북마크 추가';
-      row.dataset.bookmarked='0';
+      syncBkmkBtn(bkmkTs, false);
       toast('북마크 해제됐어요');
     }
     markDirty(); saveAll(true);
   };
   toolbar.appendChild(bkmkBtn);
 
-  // 기억으로 저장 버튼
+  // 기억으로 저장 버튼 (A-4: 현수 발화 포함)
   const saveMemBtn=document.createElement('button');
   saveMemBtn.className='chat-save-mem-btn';
   saveMemBtn.innerHTML='📖 기억 저장';
   saveMemBtn.title='이 대화를 기억 탭에 저장';
-  saveMemBtn.onclick=()=>openMemModFromChat(rawText, ts);
+  saveMemBtn.onclick=()=>openMemModFromChat(rawText, ts, getPrevUserText(row));
   toolbar.appendChild(saveMemBtn);
 
   const editBtn=document.createElement('button');
@@ -15456,7 +15482,34 @@ function updateStatusPanel(status){
   recordEmoEntry(status);
 }
 
-// ── 수정 버튼: 말풍선 직접 편집
+// 채팅창 북마크 버튼 참조 Map (ts → button element)
+const _bkmkBtnMap = new Map();
+
+// 북마크 버튼 상태 동기화 (탭에서 해제 시 호출)
+function syncBkmkBtn(ts, marked){
+  const btn=_bkmkBtnMap.get(ts);
+  if(!btn) return;
+  btn.textContent=marked?'⭐':'☆';
+  btn.title=marked?'북마크 해제':'북마크 추가';
+  btn.classList.toggle('marked', marked);
+  // row의 bookmarked 상태도 업데이트
+  const row=btn.closest('.chat-row');
+  if(row) row.dataset.bookmarked=marked?'1':'0';
+}
+
+// 직전 user 메시지 텍스트 추출
+function getPrevUserText(aiRow){
+  let prev=aiRow.previousElementSibling;
+  while(prev){
+    if(prev.classList.contains('chat-row')&&prev.classList.contains('me')){
+      return prev.querySelector('.chat-bubble')?.innerText||prev.querySelector('.chat-bubble')?.textContent||'';
+    }
+    // sys(컨텍스트 알림) 행은 건너뜀
+    if(prev.classList.contains('chat-row')&&!prev.classList.contains('sys')) break;
+    prev=prev.previousElementSibling;
+  }
+  return '';
+}
 function editAiResponse(row){
   const bubble=row.querySelector('.chat-bubble');
   const narrator=row.querySelector('.chat-narrator');
@@ -15733,6 +15786,8 @@ function hydrateChatHistory(){
   });
   showChatEmptyIfNeeded();
   refreshChatPhaseUI();
+  // A-1: 복원 완료 후 최신 대화로 스크롤 (렌더링 완료 대기)
+  requestAnimationFrame(()=>requestAnimationFrame(()=>scrollChatToBottom()));
 }
 function clearChat(){
   chatHistory=[];
@@ -16413,22 +16468,22 @@ function importData(inp){
 }
 function resetAll(){if(!confirm('정말 모든 데이터를 초기화할까요? 되돌릴 수 없어요.'))return;localStorage.removeItem('hdb');location.reload();}
 
-// F: 채팅 말풍선 → 기억으로 저장 (기억 탭 양식과 동일)
-function openMemModFromChat(rawText, ts){
+// F/A-4: 채팅 말풍선 → 기억으로 저장 (현수+해영 쌍)
+function openMemModFromChat(rawText, ts, userText=''){
   const parsed=parseAiResponse(rawText||'');
-  // 날짜 추출 (ts → YYYY.MM.DD)
   let dateStr='';
   try{
     const d=ts?new Date(ts):new Date();
     dateStr=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
   }catch(_){}
-  // 내용 조합: 대사 + 나레이터
+
+  // A-4: 현수 발화 먼저, 해영 대사+나레이터 순으로 조합
   let content='';
-  if(parsed.dialogue) content+=parsed.dialogue;
+  if(userText) content+=`[현수] ${userText}\n\n`;
+  if(parsed.dialogue) content+=`[해영] ${parsed.dialogue}`;
   if(parsed.narrator) content+=(content?'\n\n':'')+parsed.narrator;
   if(!content) content=rawText||'';
 
-  // 기억 모달 열기 (기존 openMemMod 이용, 필드 직접 채움)
   memEditIdx=-1;
   document.getElementById('mem-mod-title').textContent='채팅에서 기억 저장';
   document.getElementById('mm-date').value=dateStr;
@@ -16684,7 +16739,15 @@ function renderBookmarks(){
     dateEl.textContent=b.savedAt?new Date(b.savedAt).toLocaleString('ko-KR'):'';
     card.appendChild(dateEl);
 
-    // 대사
+    // A-2: 현수 발화 먼저 표시
+    if(b.userText){
+      const u=document.createElement('div');
+      u.style.cssText='font-size:12.5px;color:var(--tx2);background:color-mix(in srgb,var(--ac) 8%,var(--surf2));border-radius:10px;padding:8px 12px;line-height:1.7;white-space:pre-wrap;word-break:break-word;align-self:flex-end;max-width:90%';
+      u.textContent=b.userText;
+      card.appendChild(u);
+    }
+
+    // 해영 대사
     if(parsed.dialogue){
       const d=document.createElement('div');
       d.style.cssText='font-size:13px;color:var(--tx);line-height:1.75;white-space:pre-wrap;word-break:break-word';
@@ -16704,11 +16767,12 @@ function renderBookmarks(){
       card.appendChild(n);
     }
 
-    // 삭제 버튼
+    // 삭제 버튼 (A-3: 채팅창 버튼도 연동)
     const del=document.createElement('button');
     del.textContent='북마크 해제';
     del.style.cssText='align-self:flex-end;background:var(--surf2);border:1px solid var(--bdr2);border-radius:8px;padding:4px 12px;font-size:11px;color:var(--tx3);cursor:pointer;font-family:inherit';
     del.onclick=()=>{
+      syncBkmkBtn(b.ts, false); // A-3: 채팅창 버튼 연동
       DB.bookmarks.splice(i,1);
       markDirty(); saveAll(true);
       renderBookmarks();
