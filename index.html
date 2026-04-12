@@ -371,8 +371,21 @@ textarea{line-height:1.6;min-height:70px}
 #lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain}
 
 /* ══════════════════════════
-   채팅 탭 — 분할 레이아웃
+   감정 히스토리 탭
 ══════════════════════════ */
+.emo-tab-wrap{display:flex;flex-direction:column;gap:16px}
+.emo-date-sel{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.emo-date-sel select{background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;color:var(--tx);font-size:12px;font-family:inherit;padding:5px 10px;cursor:pointer}
+.emo-chart-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:16px;overflow-x:auto}
+.emo-chart-title{font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:12px}
+.emo-svg-wrap{min-width:320px;width:100%}
+.emo-log-list{display:flex;flex-direction:column;gap:8px}
+.emo-log-item{background:var(--surf);border:1px solid var(--bdr2);border-radius:10px;padding:10px 14px;display:flex;gap:12px;align-items:flex-start}
+.emo-log-time{font-size:10.5px;color:var(--tx3);white-space:nowrap;flex-shrink:0;margin-top:2px}
+.emo-log-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+.emo-log-mood{font-size:13px;color:var(--tx);font-weight:500}
+.emo-log-sub{font-size:11.5px;color:var(--tx3);word-break:break-word}
+.emo-empty{text-align:center;padding:40px 20px;color:var(--tx3);font-size:13px;line-height:1.8}
 .chat-panel{padding:0;overflow:hidden}
 .panel.chat-panel.on{display:flex;flex-direction:column}
 .chat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 14px;border-bottom:1px solid var(--bdr);background:var(--surf)}
@@ -431,10 +444,24 @@ textarea{line-height:1.6;min-height:70px}
 .chat-row.ai .chat-bubble{background:var(--surf);border:1px solid var(--bdr);color:var(--tx);border-bottom-left-radius:5px}
 .chat-row.sys .chat-bubble{background:var(--surf2);border:1px dashed var(--bdr2);color:var(--tx2);font-size:11.5px;max-width:min(640px,100%);white-space:pre-wrap}
 
-/* 대사 안 이탤릭 지문 */
-.chat-bubble .inline-stage{font-style:italic;color:var(--tx2);opacity:.85}
+/* 현수 말풍선 내 이탤릭 */
+.chat-row.me .chat-bubble .inline-stage{font-style:italic;color:rgba(255,255,255,.82);opacity:1}
+/* 해영 말풍선 내 이탤릭 */
+.chat-row.ai .chat-bubble .inline-stage{font-style:italic;color:var(--tx2);opacity:.88}
 
-/* 나레이터(지문) 블록 — ≡ 스타일 */
+/* 북마크 버튼 */
+.chat-bookmark-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;opacity:0;transition:opacity .15s;line-height:1;color:var(--tx3)}
+.chat-row:hover .chat-bookmark-btn{opacity:1}
+.chat-bookmark-btn.marked{opacity:1;color:#f5c542}
+/* 기억저장 버튼 */
+.chat-save-mem-btn{background:none;border:none;cursor:pointer;font-size:12px;padding:2px 6px;opacity:0;transition:opacity .15s;line-height:1;color:var(--tx3);border-radius:6px}
+.chat-row:hover .chat-save-mem-btn{opacity:1}
+.chat-save-mem-btn:hover{background:var(--surf3);color:var(--gn)}
+/* 재생성/수정 툴바 */
+.chat-ai-toolbar{display:flex;gap:6px;margin-top:2px;opacity:0;transition:opacity .15s}
+.chat-row.ai:hover .chat-ai-toolbar{opacity:1}
+.chat-ai-toolbar button{background:var(--surf2);border:1px solid var(--bdr2);border-radius:8px;color:var(--tx3);font-size:11px;font-family:inherit;padding:4px 9px;cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s}
+.chat-ai-toolbar button:hover{background:var(--surf3);color:var(--tx);border-color:var(--bdr)}
 .chat-narrator{
   max-width:min(640px,90%);
   padding:6px 12px 6px 14px;
@@ -456,7 +483,12 @@ textarea{line-height:1.6;min-height:70px}
 /* 타임스탬프 */
 .chat-ts{font-size:10px;color:var(--tx3);opacity:.65;padding:0 4px}
 
-.chat-compose{border-top:1px solid var(--bdr);background:var(--surf);padding:14px;display:flex;gap:10px;align-items:flex-end}
+.chat-compose{border-top:1px solid var(--bdr);background:var(--surf);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.chat-compose-row{display:flex;gap:10px;align-items:flex-end}
+.chat-compose-actions{display:flex;gap:6px;align-items:center}
+.chat-first-btn{background:var(--surf2);border:1px solid var(--bdr);border-radius:12px;color:var(--tx2);font-size:12px;font-family:inherit;padding:7px 13px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.chat-first-btn:hover{background:color-mix(in srgb,var(--pu) 12%,var(--surf2));border-color:var(--pu);color:var(--pu)}
+.chat-first-btn:disabled{opacity:.45;cursor:not-allowed}
 .chat-input{flex:1;min-height:88px;max-height:200px;background:var(--surf2);border:1px solid var(--bdr);border-radius:14px;padding:13px 15px;color:var(--tx);font-size:13px;line-height:1.7;font-family:inherit;resize:none;outline:none}
 .chat-input:focus{border-color:var(--ac)}
 .chat-send{width:88px;height:88px;flex-shrink:0;border:none;border-radius:16px;background:color-mix(in srgb,var(--ac) 72%,white 28%);color:#fff;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
@@ -489,6 +521,8 @@ textarea{line-height:1.6;min-height:70px}
   <button class="tbtn" id="tb-album" onclick="sw('album')">🖼 앨범</button>
   <button class="tbtn" id="tb-log" onclick="sw('log')">💬 로그</button>
   <button class="tbtn" id="tb-chat" onclick="sw('chat')">🤖 채팅</button>
+  <button class="tbtn" id="tb-bkmk" onclick="sw('bkmk')">🔖 북마크</button>
+  <button class="tbtn" id="tb-emo" onclick="sw('emo')">📈 감정</button>
   <button class="tbtn" id="tb-cfg" onclick="sw('cfg')">⚙ 설정</button>
 </div>
 
@@ -732,6 +766,7 @@ textarea{line-height:1.6;min-height:70px}
     </div>
     <div class="chat-head-right">
       <button class="chat-status-btn" id="chat-status-toggle" onclick="toggleStatusPanel()">📋 상태창</button>
+      <button class="chat-status-btn" onclick="exportChat()" title="대화 내보내기">📤 내보내기</button>
       <button class="chat-clear" onclick="clearChat()">대화 비우기</button>
     </div>
   </div>
@@ -751,10 +786,54 @@ textarea{line-height:1.6;min-height:70px}
     </div>
   </div>
   <div class="chat-compose">
-    <textarea id="chat-input" class="chat-input" rows="3" placeholder="메시지를 입력하세요... (Shift+Enter 줄바꿈 / Enter 전송)" onkeydown="chatKeyDown(event)"></textarea>
-    <button class="chat-send" id="chat-send" onclick="sendChat()">전송</button>
+    <div class="chat-compose-row">
+      <textarea id="chat-input" class="chat-input" rows="3" placeholder="메시지를 입력하세요... (Shift+Enter 줄바꿈 / Enter 전송)" onkeydown="chatKeyDown(event)"></textarea>
+      <button class="chat-send" id="chat-send" onclick="sendChat()">전송</button>
+    </div>
+    <div class="chat-compose-actions">
+      <button class="chat-first-btn" id="chat-first-btn" onclick="haeyoungFirst()" title="해영이가 먼저 말을 건다">🌙 해영이 먼저</button>
+    </div>
   </div>
   <div class="chat-foot" id="chat-foot"></div>
+</div>
+
+<!-- ═══════ 감정 히스토리 패널 ═══════ -->
+<div class="panel" id="p-emo">
+  <div class="stitle">📈 감정 히스토리</div>
+  <div class="emo-tab-wrap">
+    <div class="emo-date-sel">
+      <span style="font-size:12px;color:var(--tx2)">날짜 선택:</span>
+      <select id="emo-date-pick" onchange="renderEmoHistory()">
+        <option value="">오늘</option>
+      </select>
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="initEmoDatePicker();renderEmoHistory()">새로고침</button>
+    </div>
+    <div class="emo-chart-wrap">
+      <div class="emo-chart-title">기분 변화 곡선</div>
+      <div class="emo-svg-wrap" id="emo-svg-wrap">
+        <div class="emo-empty">아직 감정 데이터가 없어요.<br>채팅을 시작하면 해영이의 기분이 여기 기록돼요.</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:8px">상세 기록</div>
+      <div class="emo-log-list" id="emo-log-list">
+        <div class="emo-empty">기록 없음</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ 북마크 패널 ═══════ -->
+<div class="panel" id="p-bkmk">
+  <div class="stitle">🔖 북마크</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-size:12px;color:var(--tx3)">별표 친 대화를 모아볼 수 있어요</div>
+    <button class="btn" style="font-size:11px;padding:4px 10px" onclick="renderBookmarks()">새로고침</button>
+  </div>
+  <div id="bkmk-list" style="display:flex;flex-direction:column;gap:10px"></div>
+  <div id="bkmk-empty" style="text-align:center;padding:40px 20px;color:var(--tx3);font-size:13px;display:none">
+    아직 북마크된 대화가 없어요.<br>마음에 드는 대화에 ⭐ 눌러보세요.
+  </div>
 </div>
 
 <!-- ═══════ 설정 패널 ═══════ -->
@@ -841,6 +920,24 @@ textarea{line-height:1.6;min-height:70px}
     <input type="text" id="cfg-openai" placeholder="sk-..." onchange="markDirty()">
   </div>
 
+  </div>
+
+  <!-- 토큰 사용량 추정 -->
+  <div class="card">
+    <div class="clabel">📊 토큰 사용량 추정 <span style="font-size:11px;color:var(--tx3);font-weight:400">— 실제와 다를 수 있어요</span></div>
+    <div id="token-stats" style="background:var(--surf2);border-radius:10px;padding:12px;border:1px solid var(--bdr);font-size:12px;color:var(--tx2);line-height:1.9">
+      로딩 중...
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn" style="font-size:11px;padding:4px 10px" onclick="updateTokenStats()">새로고침</button>
+      <button class="btn dn" style="font-size:11px;padding:4px 10px" onclick="resetTokenStats()">사용량 초기화</button>
+    </div>
+    <div style="font-size:10.5px;color:var(--tx3);margin-top:8px;line-height:1.6">
+      Gemini 무료 플랜: 분당 15회, 일 1,500회 요청 제한<br>
+      Claude API: 입력 토큰 $0.80/1M, 출력 $4.00/1M (Haiku 기준)
+    </div>
+  </div>
+
   <!-- 데이터 관리 -->
   <div class="card">
     <div class="clabel">💾 데이터 관리</div>
@@ -885,8 +982,8 @@ textarea{line-height:1.6;min-height:70px}
 let DB = {
   haeyoung:{}, hyunsoo:{},
   lives:[], memories:[], album:[], logs:[],
-  chatHistory:[],
-  settings:{theme:'dark',ai:'ollama',ollamaModel:'exaone3.5:7.8b',geminiKey:'',claudeKey:'',openaiKey:''}
+  chatHistory:[], bookmarks:[],
+  settings:{theme:'dark',ai:'gemini',ollamaModel:'exaone3.5:7.8b',geminiKey:'',claudeKey:'',openaiKey:''}
 };
 let dirty = false;
 let memEditIdx = -1;
@@ -14520,13 +14617,13 @@ const THEME_LIST = [
 function init(){
   _isBooting = true;
   loadFromLS();
-  // 최초 실행 시 기본값 세팅 (loadFromLS 직후, render 전에 해야 함)
   if(!DB.memories || DB.memories.length === 0) {
     DB.memories = DEFAULT_MEMORIES;
   }
   if(!DB.logs || DB.logs.length === 0) {
     DB.logs = DEFAULT_LOGS.map(l => ({...l}));
   }
+  if(!DB.bookmarks) DB.bookmarks = [];
   DB.settings = DB.settings || {};
   DB.settings.theme = normalizeThemeId(DB.settings.theme);
   renderLives();
@@ -14541,8 +14638,11 @@ function init(){
   if(cid) document.getElementById('gd-cid').value=cid;
   gdRefUI();
   updateStorageInfo();
+  updateTokenStats(); // G: 설정탭 초기 로드
   clearDirty();
   _isBooting = false;
+  // 채팅 탭 진입 시 최신 대화로 자동 스크롤
+  setTimeout(()=>scrollChatToBottom(), 80);
 }
 
 // ════════════════════════════════
@@ -14553,6 +14653,9 @@ function sw(id){
   document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
   document.getElementById('p-'+id).classList.add('on');
   document.getElementById('tb-'+id).classList.add('on');
+  if(id==='bkmk') renderBookmarks();
+  if(id==='cfg') updateTokenStats();
+  if(id==='emo'){ initEmoDatePicker(); renderEmoHistory(); }
 }
 
 // ════════════════════════════════
@@ -14874,6 +14977,7 @@ async function gdGetTok(){
 function gdToggleAuto(on){localStorage.setItem('gd_auto',on?'1':'0');gdLog(on?'자동 Drive 저장 켜짐 (30초 지연)':'자동 Drive 저장 꺼짐');}
 function queueAutoDriveSave(){
   if(localStorage.getItem('gd_auto')!=='1') return;
+  if(!gdLoadTok()) return; // 토큰 없으면 시도 안 함
   clearTimeout(_gdAutoTimer);
   _gdAutoTimer=setTimeout(()=>{if(dirty)gdPush(true);},30000);
 }
@@ -15165,21 +15269,23 @@ function parseAiResponse(raw){
   };
 }
 
-// 대사 안 *이탤릭* 인라인 렌더링
+// 대사 안 *이탤릭* 및 (괄호 지문) 인라인 렌더링 — 통일
 function renderDialogueLine(text){
   const span=document.createElement('span');
-  // *텍스트* → <em class="inline-stage">텍스트</em>
-  const parts=text.split(/(\*[^*]+\*)/g);
-  parts.forEach(p=>{
-    if(p.startsWith('*')&&p.endsWith('*')&&p.length>2){
-      const em=document.createElement('em');
-      em.className='inline-stage';
-      em.textContent=p.slice(1,-1);
-      span.appendChild(em);
-    } else if(p){
-      span.appendChild(document.createTextNode(p));
-    }
-  });
+  // *텍스트* 와 (텍스트) 모두 이탤릭으로 처리
+  const re=/(\*[^*\n]+\*|\([^)\n]{2,60}\))/g;
+  let last=0, m;
+  while((m=re.exec(text))!==null){
+    if(m.index>last) span.appendChild(document.createTextNode(text.slice(last,m.index)));
+    const raw=m[0];
+    const em=document.createElement('em');
+    em.className='inline-stage';
+    // 괄호면 괄호째로, 별표면 별표 제거
+    em.textContent=raw.startsWith('*') ? raw.slice(1,-1) : raw;
+    span.appendChild(em);
+    last=m.index+raw.length;
+  }
+  if(last<text.length) span.appendChild(document.createTextNode(text.slice(last)));
   return span;
 }
 
@@ -15231,6 +15337,62 @@ function appendAiResponse(rawText, ts=''){
     row.appendChild(stamp);
   }
 
+  // 수정/재생성 툴바
+  const toolbar=document.createElement('div');
+  toolbar.className='chat-ai-toolbar';
+
+  // 북마크 버튼
+  const bkmkBtn=document.createElement('button');
+  bkmkBtn.className='chat-bookmark-btn';
+  const bkmkTs=ts||new Date().toISOString();
+  const isMarked=(DB.bookmarks||[]).some(b=>b.ts===bkmkTs);
+  bkmkBtn.textContent=isMarked?'⭐':'☆';
+  bkmkBtn.title=isMarked?'북마크 해제':'북마크 추가';
+  if(isMarked) bkmkBtn.classList.add('marked');
+  row.dataset.ts=bkmkTs;
+  bkmkBtn.onclick=()=>{
+    const marked=row.dataset.bookmarked==='1';
+    if(!marked){
+      if(!DB.bookmarks) DB.bookmarks=[];
+      DB.bookmarks.unshift({ts:bkmkTs, raw:rawText, savedAt:new Date().toISOString()});
+      bkmkBtn.textContent='⭐';
+      bkmkBtn.classList.add('marked');
+      bkmkBtn.title='북마크 해제';
+      row.dataset.bookmarked='1';
+      toast('⭐ 북마크됐어요');
+    } else {
+      const idx=(DB.bookmarks||[]).findIndex(b=>b.ts===bkmkTs);
+      if(idx>=0) DB.bookmarks.splice(idx,1);
+      bkmkBtn.textContent='☆';
+      bkmkBtn.classList.remove('marked');
+      bkmkBtn.title='북마크 추가';
+      row.dataset.bookmarked='0';
+      toast('북마크 해제됐어요');
+    }
+    markDirty(); saveAll(true);
+  };
+  toolbar.appendChild(bkmkBtn);
+
+  // 기억으로 저장 버튼
+  const saveMemBtn=document.createElement('button');
+  saveMemBtn.className='chat-save-mem-btn';
+  saveMemBtn.innerHTML='📖 기억 저장';
+  saveMemBtn.title='이 대화를 기억 탭에 저장';
+  saveMemBtn.onclick=()=>openMemModFromChat(rawText, ts);
+  toolbar.appendChild(saveMemBtn);
+
+  const editBtn=document.createElement('button');
+  editBtn.innerHTML='✏️ 수정';
+  editBtn.title='이 답변을 직접 수정';
+  editBtn.onclick=()=>editAiResponse(row);
+  const regenBtn=document.createElement('button');
+  regenBtn.innerHTML='🔄 재생성';
+  regenBtn.title='같은 맥락에서 다시 생성';
+  regenBtn.onclick=()=>regenAiResponse(row);
+  toolbar.appendChild(editBtn);
+  toolbar.appendChild(regenBtn);
+  row.appendChild(toolbar);
+
   wrap.appendChild(row);
   scrollChatToBottom();
 
@@ -15241,39 +15403,205 @@ function appendAiResponse(rawText, ts=''){
 
 // 상태창 12항목 업데이트
 const STATUS_FIELDS=[
-  {key:'시간',cls:''},
-  {key:'날씨',cls:''},
-  {key:'장소',cls:'accent'},
-  {key:'상황',cls:'accent'},
-  {key:'기분',cls:'warm'},
-  {key:'컨디션',cls:''},
-  {key:'착장',cls:''},
-  {key:'포즈',cls:''},
-  {key:'목표',cls:'warm'},
-  {key:'관계성',cls:'accent'},
-  {key:'속마음',cls:'warm'},
-  {key:'소지품',cls:''},
+  {key:'시간',  cls:'',       icon:'🕐'},
+  {key:'날씨',  cls:'',       icon:'🌤'},
+  {key:'장소',  cls:'accent', icon:'📍'},
+  {key:'상황',  cls:'accent', icon:'🎬'},
+  {key:'기분',  cls:'warm',   icon:'mood'}, // 동적
+  {key:'컨디션',cls:'',       icon:'💗'},
+  {key:'착장',  cls:'',       icon:'👔'},
+  {key:'포즈',  cls:'',       icon:'🧍'},
+  {key:'목표',  cls:'warm',   icon:'🎯'},
+  {key:'관계성',cls:'accent', icon:'🤝'},
+  {key:'속마음',cls:'warm',   icon:'💭'},
+  {key:'소지품',cls:'',       icon:'🎒'},
 ];
+
+// 기분 텍스트 → 이모지 매핑
+function moodIcon(val){
+  const v=(val||'').toLowerCase();
+  if(/행복|기쁨|좋아|설레|신나|흐뭇|뿌듯|즐거|사랑|따뜻/.test(v)) return '😊';
+  if(/부끄|수줍|민망|창피/.test(v)) return '😳';
+  if(/걱정|불안|긴장|조마/.test(v)) return '😟';
+  if(/슬프|우울|눈물|울컥|서운/.test(v)) return '😢';
+  if(/화|짜증|억울|답답/.test(v)) return '😤';
+  if(/장난|놀리|피식|웃김|재미/.test(v)) return '😏';
+  if(/평온|차분|안정|잔잔/.test(v)) return '😌';
+  if(/피곤|지침|졸림/.test(v)) return '😴';
+  if(/그리움|보고싶|아련/.test(v)) return '🥺';
+  return '🙂';
+}
+
 function updateStatusPanel(status){
   const body=document.getElementById('sp-body');
   const empty=document.getElementById('sp-empty');
   if(!body) return;
-  // 기존 카드 제거
   [...body.querySelectorAll('.sp-row')].forEach(el=>el.remove());
   if(empty) empty.style.display='none';
 
   let count=0;
-  STATUS_FIELDS.forEach(({key,cls})=>{
+  STATUS_FIELDS.forEach(({key,cls,icon})=>{
     const v=status[key];
     if(!v||v==='없음'||v==='-') return;
     const row=document.createElement('div');
     row.className='sp-row'+(cls?' '+cls:'');
-    row.innerHTML=`<div class="sp-label">${key}</div><div class="sp-val">${v}</div>`;
+    const ic=icon==='mood'?moodIcon(v):icon;
+    row.innerHTML=`<div class="sp-label">${ic} ${key}</div><div class="sp-val">${v}</div>`;
     body.appendChild(row);
     count++;
   });
 
   if(!count&&empty) empty.style.display='';
+  // 2-2: 감정 히스토리 기록
+  recordEmoEntry(status);
+}
+
+// ── 수정 버튼: 말풍선 직접 편집
+function editAiResponse(row){
+  const bubble=row.querySelector('.chat-bubble');
+  const narrator=row.querySelector('.chat-narrator');
+  if(!bubble) return;
+
+  // 현재 텍스트 추출 (이탤릭 포함)
+  const currentText=row.dataset.rawText||bubble.textContent;
+  const textarea=document.createElement('textarea');
+  textarea.value=currentText;
+  textarea.style.cssText='width:100%;min-height:120px;background:var(--surf2);border:1px solid var(--ac);border-radius:10px;padding:10px;color:var(--tx);font-size:13px;line-height:1.7;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box';
+
+  const btnRow=document.createElement('div');
+  btnRow.style.cssText='display:flex;gap:8px;margin-top:6px';
+
+  const confirmBtn=document.createElement('button');
+  confirmBtn.textContent='저장';
+  confirmBtn.style.cssText='background:var(--ac);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:12px';
+
+  const cancelBtn=document.createElement('button');
+  cancelBtn.textContent='취소';
+  cancelBtn.style.cssText='background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:12px;color:var(--tx2)';
+
+  btnRow.appendChild(confirmBtn);
+  btnRow.appendChild(cancelBtn);
+
+  // 말풍선/나레이터 숨기고 textarea 삽입
+  if(bubble) bubble.style.display='none';
+  if(narrator) narrator.style.display='none';
+  const toolbar=row.querySelector('.chat-ai-toolbar');
+  if(toolbar) toolbar.style.display='none';
+  row.insertBefore(textarea, row.querySelector('.chat-ts')||null);
+  row.insertBefore(btnRow, row.querySelector('.chat-ts')||null);
+  textarea.focus();
+
+  confirmBtn.onclick=()=>{
+    const newText=textarea.value.trim();
+    if(!newText){cancelBtn.click();return;}
+    // chatHistory에서 마지막 assistant 메시지 업데이트
+    const lastAi=chatHistory.slice().reverse().find(m=>m.role==='assistant');
+    if(lastAi) lastAi.content=newText;
+    // 행 새로 렌더링
+    const newRow=appendAiResponseAt(row, newText, row.dataset.ts||'');
+    row.replaceWith(newRow);
+    persistChatHistory();
+  };
+  cancelBtn.onclick=()=>{
+    textarea.remove();
+    btnRow.remove();
+    if(bubble) bubble.style.display='';
+    if(narrator) narrator.style.display='';
+    if(toolbar) toolbar.style.display='';
+  };
+}
+
+// 특정 위치에 AI 응답 행 삽입 (수정 후 교체용)
+function appendAiResponseAt(refRow, rawText, ts){
+  const parsed=parseAiResponse(rawText);
+  const row=document.createElement('div');
+  row.className='chat-row ai';
+  row.dataset.rawText=rawText;
+  row.dataset.ts=ts;
+
+  if(parsed.dialogue){
+    const bubble=document.createElement('div');
+    bubble.className='chat-bubble';
+    const lines=parsed.dialogue.split('\n');
+    lines.forEach((line,i)=>{
+      bubble.appendChild(renderDialogueLine(line));
+      if(i<lines.length-1) bubble.appendChild(document.createElement('br'));
+    });
+    row.appendChild(bubble);
+  }
+  if(parsed.narrator){
+    const nar=document.createElement('div');
+    nar.className='chat-narrator';
+    nar.textContent=parsed.narrator;
+    row.appendChild(nar);
+  }
+  if(!parsed.dialogue&&!parsed.narrator){
+    const bubble=document.createElement('div');
+    bubble.className='chat-bubble';
+    bubble.textContent=rawText;
+    row.appendChild(bubble);
+  }
+  if(ts){
+    const stamp=document.createElement('div');
+    stamp.className='chat-ts';
+    stamp.textContent=formatChatTime(ts);
+    row.appendChild(stamp);
+  }
+  const toolbar=document.createElement('div');
+  toolbar.className='chat-ai-toolbar';
+  // 북마크 버튼
+  const bkmkBtn2=document.createElement('button');
+  bkmkBtn2.className='chat-bookmark-btn';
+  const bkmkTs2=ts||new Date().toISOString();
+  const isMarked2=(DB.bookmarks||[]).some(b=>b.ts===bkmkTs2);
+  bkmkBtn2.textContent=isMarked2?'⭐':'☆';
+  bkmkBtn2.title=isMarked2?'북마크 해제':'북마크 추가';
+  if(isMarked2) bkmkBtn2.classList.add('marked');
+  row.dataset.ts=bkmkTs2;
+  bkmkBtn2.onclick=()=>{
+    const marked=row.dataset.bookmarked==='1';
+    if(!marked){
+      if(!DB.bookmarks) DB.bookmarks=[];
+      DB.bookmarks.unshift({ts:bkmkTs2, raw:rawText, savedAt:new Date().toISOString()});
+      bkmkBtn2.textContent='⭐'; bkmkBtn2.classList.add('marked');
+      bkmkBtn2.title='북마크 해제'; row.dataset.bookmarked='1';
+      toast('⭐ 북마크됐어요');
+    } else {
+      const idx=(DB.bookmarks||[]).findIndex(b=>b.ts===bkmkTs2);
+      if(idx>=0) DB.bookmarks.splice(idx,1);
+      bkmkBtn2.textContent='☆'; bkmkBtn2.classList.remove('marked');
+      bkmkBtn2.title='북마크 추가'; row.dataset.bookmarked='0';
+      toast('북마크 해제됐어요');
+    }
+    markDirty(); saveAll(true);
+  };
+  toolbar.appendChild(bkmkBtn2);
+  const editBtn=document.createElement('button');
+  editBtn.innerHTML='✏️ 수정';
+  editBtn.onclick=()=>editAiResponse(row);
+  const regenBtn=document.createElement('button');
+  regenBtn.innerHTML='🔄 재생성';
+  regenBtn.onclick=()=>regenAiResponse(row);
+  toolbar.appendChild(editBtn);
+  toolbar.appendChild(regenBtn);
+  row.appendChild(toolbar);
+
+  if(Object.keys(parsed.status).length) updateStatusPanel(parsed.status);
+  return row;
+}
+
+// ── 재생성 버튼: 마지막 AI 응답 삭제 후 같은 맥락으로 재전송
+async function regenAiResponse(row){
+  if(_chatBusy) return;
+  // chatHistory에서 마지막 assistant 제거
+  const lastIdx=chatHistory.map(m=>m.role).lastIndexOf('assistant');
+  if(lastIdx>=0) chatHistory.splice(lastIdx,1);
+  // 행 제거
+  row.remove();
+  // 마지막 user 메시지로 재전송
+  const lastUser=chatHistory.slice().reverse().find(m=>m.role==='user');
+  const text=lastUser?lastUser.content:'__HAEYOUNG_CONTINUE__';
+  await _doSendChat(text, text==='__HAEYOUNG_CONTINUE__');
 }
 
 // 상태창 토글
@@ -15294,10 +15622,10 @@ function appendContextNotice(meta){
   const outer=document.createElement('div');
   outer.className='chat-ctx';
   const toggle=document.createElement('div');
-  toggle.className='chat-ctx-toggle';
+  toggle.className='chat-ctx-toggle'; // 기본 닫힘
   toggle.innerHTML='📎 컨텍스트 반영';
   const body=document.createElement('div');
-  body.className='chat-ctx-body';
+  body.className='chat-ctx-body'; // 기본 display:none
   body.textContent=formatSelectedContextNotice(meta);
   toggle.onclick=()=>{ toggle.classList.toggle('open'); body.classList.toggle('open'); };
   outer.appendChild(toggle);
@@ -15327,7 +15655,28 @@ function appendMsg(role, text, opts={}){
   const wrap=document.getElementById('chat-messages');
   if(!wrap) return null;
   hideChatEmpty();
-  const row=createChatRow(role, false, text, opts.ts||'');
+  const row=document.createElement('div');
+  const rowClass=role==='user'?'me':role==='assistant'?'ai':'sys';
+  row.className='chat-row '+rowClass;
+  const bubble=document.createElement('div');
+  bubble.className='chat-bubble';
+  if(role==='user'){
+    // 현수 말풍선도 *이탤릭* 파싱
+    const lines=text.split('\n');
+    lines.forEach((line,i)=>{
+      bubble.appendChild(renderDialogueLine(line));
+      if(i<lines.length-1) bubble.appendChild(document.createElement('br'));
+    });
+  } else {
+    bubble.textContent=text;
+  }
+  row.appendChild(bubble);
+  if(opts.ts&&role!=='system'){
+    const stamp=document.createElement('div');
+    stamp.className='chat-ts';
+    stamp.textContent=formatChatTime(opts.ts);
+    row.appendChild(stamp);
+  }
   if(opts.loading) row.dataset.loading='1';
   wrap.appendChild(row);
   scrollChatToBottom();
@@ -15619,6 +15968,18 @@ function formatSelectedContextNotice(meta){
   const logs=(meta?.previewLogs?.length ? meta.previewLogs.join(' / ') : '없음');
   return `이번 답변에 반영한 컨텍스트\n전생 ${meta?.selectedLives||0}개: ${lives}\n기억 ${meta?.selectedMemories||0}개: ${memories}\n로그 ${meta?.selectedLogs||0}개: ${logs}`;
 }
+function getNowString(){
+  const now=new Date();
+  const days=['일','월','화','수','목','금','토'];
+  const y=now.getFullYear(), mo=now.getMonth()+1, d=now.getDate();
+  const dow=days[now.getDay()];
+  const h=now.getHours(), m=now.getMinutes();
+  const ampm=h<12?'오전':'오후';
+  const h12=h%12||12;
+  const mm=String(m).padStart(2,'0');
+  return `${y}년 ${mo}월 ${d}일 (${dow}) ${ampm} ${h12}:${mm}`;
+}
+
 function collectPromptContext(userMsg){
   const hy=DB.haeyoung||{};
   const hs=DB.hyunsoo||{};
@@ -15793,9 +16154,28 @@ ${logDetails||'- 없음'}
 </NARRATOR>
 
 ━━━━━━━━━━━━━━━━━━━━━━
-[현재 사용자 메시지]
+[현수의 *지문* 처리 규칙]
 ━━━━━━━━━━━━━━━━━━━━━━
-${toOneLine(userMsg)}
+현수의 메시지에 *별표로 감싼 텍스트*가 있으면, 그것은 현수가 실제로 한 행동·표정·몸짓이다.
+해영은 그 행동을 인식하고 자연스럽게 반응한다. 행동이 있었다는 사실을 해설하지 말고, 반응으로 보여줘라.
+예: 현수가 "*해영의 손을 잡는다*"고 보내면 → 해영은 잡힌 손을 인식하고 반응하는 대사/행동을 출력.
+예: 현수가 "*울먹이며*"라고 보내면 → 해영은 그 표정을 보고 반응.
+
+━━━━━━━━━━━━━━━━━━━━━━
+[현재 시각 — 매우 중요]
+━━━━━━━━━━━━━━━━━━━━━━
+지금 이 순간의 실제 날짜와 시간: ${getNowString()}
+해영이는 이 시각을 알고 있다. 상태창의 '시간' 항목도 이 시각을 기준으로 작성한다.
+현수와의 대화가 전날 밤에 시작되어 오늘로 이어졌다면, 해영이도 하루가 지났다는 걸 안다.
+예: 전날 저녁에 "7시에 외출하자"고 했다면, 해당 시각이 되면 해영이가 먼저 준비를 언급한다.
+
+━━━━━━━━━━━━━━━━━━━━━━
+[이번 메시지]
+━━━━━━━━━━━━━━━━━━━━━━
+${userMsg==='__HAEYOUNG_CONTINUE__'
+  ? '(현수가 아무 말 없이 전송 버튼을 눌렀다. 해영이가 자연스럽게 다음 말을 이어간다. 짧게, 일상적으로.)'
+  : toOneLine(userMsg)
+}
   `);
 
   return {
@@ -15884,7 +16264,33 @@ async function callGemini(apiKey, history, systemPrompt){
 
 // ── Claude API 호출 (3-2 이후 필요 시 연결)
 async function callClaude(apiKey, history, systemPrompt){
-  throw new Error('아직 3-2 단계에서는 Claude 호출을 연결하지 않았어. 설정에서 Gemini를 선택해줘.');
+  const safeKey=(apiKey||'').trim();
+  if(!safeKey) throw new Error('설정 탭에 Claude API 키를 먼저 넣어줘.');
+  const messages=(history||[])
+    .filter(m=>m&&(m.role==='user'||m.role==='assistant')&&String(m.content||'').trim())
+    .map(m=>({role:m.role,content:String(m.content).trim()}));
+  if(!messages.length) throw new Error('보낼 대화 내용이 없어.');
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':safeKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:1024,
+      system:systemPrompt,
+      messages
+    })
+  });
+  let data=null;
+  try{ data=await res.json(); }catch(_){ throw new Error('Claude 응답을 해석하지 못했어.'); }
+  if(!res.ok){ throw new Error('Claude 호출 실패: '+(data?.error?.message||`HTTP ${res.status}`)); }
+  const text=(data.content||[]).map(b=>b.text||'').join('').trim();
+  if(!text) throw new Error('Claude가 비어있는 응답을 돌려줬어.');
+  return text;
 }
 
 // ── 메인 전송 함수 (3-3: 저장/복원/로딩/오류 처리 완료)
@@ -15892,63 +16298,89 @@ async function sendChat(){
   if(_chatBusy) return;
   const input=document.getElementById('chat-input');
   const sendBtn=document.getElementById('chat-send');
-  const text=input?.value?.trim();
-  if(!text) return;
+  const rawText=input?.value?.trim();
+  if(!rawText) return; // 빈 입력 막음
 
+  await _doSendChat(rawText, false);
+}
+
+// 해영이 먼저 말 걸기
+async function haeyoungFirst(){
+  if(_chatBusy) return;
+  await _doSendChat('__HAEYOUNG_CONTINUE__', true);
+}
+
+async function _doSendChat(text, isFirst){
+  const input=document.getElementById('chat-input');
+  const sendBtn=document.getElementById('chat-send');
+  const firstBtn=document.getElementById('chat-first-btn');
   _chatBusy=true;
   let loadingRow=null;
-  if(sendBtn){
-    sendBtn.disabled=true;
-    sendBtn.textContent='답변 중...';
-  }
+  if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='답변 중...';}
+  if(firstBtn) firstBtn.disabled=true;
   setChatStatus('해영이가 답하는 중...');
 
   try{
-    input.value='';
+    if(input) input.value='';
 
-    const userMsg={role:'user', content:text, ts:new Date().toISOString()};
-    chatHistory.push(userMsg);
-    trimChatHistory();
-    appendMsg('user', text, {ts:userMsg.ts});
+    // isFirst면 채팅창에 사용자 메시지 안 띄움
+    if(!isFirst){
+      const userMsg={role:'user',content:text,ts:new Date().toISOString()};
+      chatHistory.push(userMsg);
+      trimChatHistory();
+      appendMsg('user',text,{ts:userMsg.ts});
+    }
 
-    loadingRow=appendMsg('system', '해영이가 답하고 있어요...', {loading:true});
+    loadingRow=appendMsg('system','해영이가 답하고 있어요...',{loading:true});
 
-    const prompt=buildSystemPrompt(text);
+    // 탭에서 수정한 내용이 항상 채팅에 반영되도록 DB 동기화
+    try{collectData();}catch(e){console.warn('collectData 오류:',e);}
+
+    const promptText=isFirst?'__HAEYOUNG_CONTINUE__':text;
+    const prompt=buildSystemPrompt(promptText);
     appendContextNotice(_lastPromptMeta);
     refreshChatPhaseUI();
 
     const aiType=(DB.settings?.ai||document.getElementById('cfg-ai')?.value||'gemini').trim();
     let result=null;
     if(aiType==='gemini'){
-      result=await callGemini(DB.settings?.geminiKey||document.getElementById('cfg-gemini')?.value||'', chatHistory, prompt);
+      result=await callGemini(
+        DB.settings?.geminiKey||document.getElementById('cfg-gemini')?.value||'',
+        chatHistory, prompt
+      );
     }else if(aiType==='claude'){
-      result={model:'claude', text:await callClaude(DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'', chatHistory, prompt)};
+      const claudeText=await callClaude(
+        DB.settings?.claudeKey||document.getElementById('cfg-claude')?.value||'',
+        chatHistory, prompt
+      );
+      result={model:'claude',text:claudeText,raw:null};
     }else{
-      throw new Error('현재 채팅은 Gemini만 연결돼 있어. 설정에서 AI 모델을 Gemini로 바꿔줘.');
+      throw new Error('설정에서 AI 모델을 Gemini 또는 Claude로 바꿔줘.');
     }
 
     if(loadingRow) loadingRow.remove();
 
-    const aiMsg={role:'assistant', content:result.text, ts:new Date().toISOString()};
+    const aiMsg={role:'assistant',content:result.text,ts:new Date().toISOString()};
     chatHistory.push(aiMsg);
     trimChatHistory();
-    appendAiResponse(result.text, aiMsg.ts);
-
+    appendAiResponse(result.text,aiMsg.ts);
     persistChatHistory();
-    console.log('[3-3] Gemini prompt\\n', prompt);
-    console.log('[3-3] Gemini response\\n', result.raw);
+    // G: 토큰 사용량 기록
+    recordTokenUsage(prompt, result.text);
+
+    console.log('[chat] prompt\n',prompt);
+    if(result.raw) console.log('[chat] raw response\n',result.raw);
+
   }catch(err){
-    console.error('[3-3] chat error:', err);
+    console.error('[chat] error:',err);
     if(loadingRow) loadingRow.remove();
-    appendMsg('system', '⚠ 답변을 가져오는 중 오류가 났어: '+err.message);
-    setChatStatus('오류가 났지만 입력창은 그대로 복구했어요');
+    appendMsg('system','⚠ 오류: '+err.message);
+    setChatStatus('오류 발생 — 다시 시도해줘');
     refreshChatPhaseUI();
   }finally{
     _chatBusy=false;
-    if(sendBtn){
-      sendBtn.disabled=false;
-      sendBtn.textContent='전송';
-    }
+    if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='전송';}
+    if(firstBtn) firstBtn.disabled=false;
     refreshChatPhaseUI();
     input?.focus();
     scrollChatToBottom();
@@ -15958,7 +16390,7 @@ async function sendChat(){
 
 function applyCfg(){
   const s=DB.settings||{};
-  const el=document.getElementById('cfg-ai');if(el)el.value=s.ai||'ollama';
+  const el=document.getElementById('cfg-ai');if(el)el.value=s.ai||'gemini';
   const om=document.getElementById('cfg-ollama');if(om)om.value=s.ollamaModel||'exaone3.5:7.8b';
   const gk=document.getElementById('cfg-gemini');if(gk)gk.value=s.geminiKey||'';
   const ck=document.getElementById('cfg-claude');if(ck)ck.value=s.claudeKey||'';
@@ -15981,9 +16413,366 @@ function importData(inp){
 }
 function resetAll(){if(!confirm('정말 모든 데이터를 초기화할까요? 되돌릴 수 없어요.'))return;localStorage.removeItem('hdb');location.reload();}
 
+// F: 채팅 말풍선 → 기억으로 저장 (기억 탭 양식과 동일)
+function openMemModFromChat(rawText, ts){
+  const parsed=parseAiResponse(rawText||'');
+  // 날짜 추출 (ts → YYYY.MM.DD)
+  let dateStr='';
+  try{
+    const d=ts?new Date(ts):new Date();
+    dateStr=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  }catch(_){}
+  // 내용 조합: 대사 + 나레이터
+  let content='';
+  if(parsed.dialogue) content+=parsed.dialogue;
+  if(parsed.narrator) content+=(content?'\n\n':'')+parsed.narrator;
+  if(!content) content=rawText||'';
+
+  // 기억 모달 열기 (기존 openMemMod 이용, 필드 직접 채움)
+  memEditIdx=-1;
+  document.getElementById('mem-mod-title').textContent='채팅에서 기억 저장';
+  document.getElementById('mm-date').value=dateStr;
+  document.getElementById('mm-title').value='';
+  document.getElementById('mm-imp').value='2';
+  document.getElementById('mm-cont').value=content.slice(0,800);
+  document.getElementById('mm-tags').value='채팅';
+  document.getElementById('mem-mod').classList.add('open');
+  setTimeout(()=>document.getElementById('mm-title').focus(),100);
+}
+
 // ════════════════════════════════
-// 토스트
+// 2-2: 감정 히스토리
 // ════════════════════════════════
+const EMO_HIST_KEY='hdb_emo_hist';
+
+function moodToScore(val){
+  const v=(val||'').toLowerCase();
+  if(/행복|기쁨|설레|신나|뿌듯|사랑|흐뭇|즐거/.test(v)) return 90;
+  if(/따뜻|좋아|편안|안정|평온|잔잔/.test(v)) return 75;
+  if(/장난|피식|재미|놀림/.test(v)) return 65;
+  if(/부끄|수줍|민망/.test(v)) return 55;
+  if(/보통|그럭저럭|무난/.test(v)) return 50;
+  if(/그리움|보고싶|아련/.test(v)) return 45;
+  if(/피곤|지침|졸림/.test(v)) return 40;
+  if(/걱정|불안|긴장/.test(v)) return 35;
+  if(/서운|속상|슬프|우울|눈물/.test(v)) return 25;
+  if(/화|짜증|억울|답답/.test(v)) return 20;
+  return 60;
+}
+function loadEmoHist(){
+  try{return JSON.parse(localStorage.getItem(EMO_HIST_KEY)||'{}');}catch(_){return {};}
+}
+function saveEmoHist(data){
+  localStorage.setItem(EMO_HIST_KEY,JSON.stringify(data));
+}
+function recordEmoEntry(status){
+  if(!status||!status['기분']) return;
+  const data=loadEmoHist();
+  const today=new Date().toISOString().slice(0,10);
+  if(!data[today]) data[today]=[];
+  data[today].push({
+    ts:new Date().toISOString(),
+    mood:status['기분']||'',
+    score:moodToScore(status['기분']),
+    condition:status['컨디션']||'',
+    relation:status['관계성']||'',
+    inner:status['속마음']||''
+  });
+  const keys=Object.keys(data).sort();
+  if(keys.length>60) keys.slice(0,-60).forEach(k=>delete data[k]);
+  saveEmoHist(data);
+}
+function initEmoDatePicker(){
+  const sel=document.getElementById('emo-date-pick');
+  if(!sel) return;
+  const data=loadEmoHist();
+  const dates=Object.keys(data).sort().reverse();
+  const today=new Date().toISOString().slice(0,10);
+  const cur=sel.value||today;
+  sel.innerHTML='';
+  const todayOpt=document.createElement('option');
+  todayOpt.value=today; todayOpt.textContent='오늘 ('+today+')';
+  sel.appendChild(todayOpt);
+  dates.filter(d=>d!==today).forEach(d=>{
+    const opt=document.createElement('option');
+    opt.value=d; opt.textContent=d; sel.appendChild(opt);
+  });
+  sel.value=cur;
+}
+function renderEmoHistory(){
+  const sel=document.getElementById('emo-date-pick');
+  const svgWrap=document.getElementById('emo-svg-wrap');
+  const logList=document.getElementById('emo-log-list');
+  if(!svgWrap||!logList) return;
+  const data=loadEmoHist();
+  const today=new Date().toISOString().slice(0,10);
+  const date=(sel&&sel.value)||today;
+  const entries=data[date]||[];
+
+  // 상세 로그
+  logList.innerHTML='';
+  if(!entries.length){
+    logList.innerHTML='<div class="emo-empty">이 날의 기록이 없어요.</div>';
+  } else {
+    entries.forEach(e=>{
+      const item=document.createElement('div');
+      item.className='emo-log-item';
+      const timeStr=e.ts?new Date(e.ts).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'';
+      item.innerHTML=
+        `<div class="emo-log-time">${timeStr}</div>`+
+        `<div class="emo-log-body">`+
+          `<div class="emo-log-mood">${moodIcon(e.mood)} ${e.mood}</div>`+
+          (e.condition?`<div class="emo-log-sub">컨디션: ${e.condition}</div>`:'') +
+          (e.relation?`<div class="emo-log-sub">관계성: ${e.relation}</div>`:'') +
+          (e.inner?`<div class="emo-log-sub" style="color:var(--tx2);font-style:italic">${e.inner}</div>`:'') +
+        `</div>`;
+      logList.appendChild(item);
+    });
+  }
+
+  // SVG 감정 곡선
+  svgWrap.innerHTML='';
+  if(!entries.length){
+    svgWrap.innerHTML='<div class="emo-empty">아직 감정 데이터가 없어요.<br>채팅하면 해영이의 기분이 여기 기록돼요.</div>';
+    return;
+  }
+  const W=Math.max(svgWrap.offsetWidth||320,320);
+  const H=160;
+  const PAD={t:20,r:20,b:30,l:36};
+  const iW=W-PAD.l-PAD.r, iH=H-PAD.t-PAD.b;
+  const scores=entries.map(e=>e.score);
+  const n=scores.length;
+  const xStep=n>1?iW/(n-1):iW/2;
+  const pts=scores.map((s,i)=>({x:PAD.l+(n>1?i*xStep:iW/2),y:PAD.t+iH*(1-s/100),s,e:entries[i]}));
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('width','100%'); svg.setAttribute('height',H);
+  // 그리드
+  [25,50,75].forEach(v=>{
+    const yg=PAD.t+iH*(1-v/100);
+    const line=document.createElementNS(ns,'line');
+    line.setAttribute('x1',PAD.l);line.setAttribute('x2',W-PAD.r);
+    line.setAttribute('y1',yg);line.setAttribute('y2',yg);
+    line.setAttribute('stroke','var(--bdr2)');line.setAttribute('stroke-width','1');
+    line.setAttribute('stroke-dasharray','4 3');
+    svg.appendChild(line);
+    const lbl=document.createElementNS(ns,'text');
+    lbl.setAttribute('x',PAD.l-4);lbl.setAttribute('y',yg+4);
+    lbl.setAttribute('text-anchor','end');lbl.setAttribute('font-size','9');
+    lbl.setAttribute('fill','var(--tx3)');lbl.textContent=v;
+    svg.appendChild(lbl);
+  });
+  // 그라디언트
+  const defs=document.createElementNS(ns,'defs');
+  const grad=document.createElementNS(ns,'linearGradient');
+  grad.setAttribute('id','emoGrad');grad.setAttribute('x1','0');grad.setAttribute('y1','0');
+  grad.setAttribute('x2','0');grad.setAttribute('y2','1');
+  const s1=document.createElementNS(ns,'stop');
+  s1.setAttribute('offset','0%');s1.setAttribute('stop-color','var(--pu)');s1.setAttribute('stop-opacity','0.25');
+  const s2=document.createElementNS(ns,'stop');
+  s2.setAttribute('offset','100%');s2.setAttribute('stop-color','var(--pu)');s2.setAttribute('stop-opacity','0.02');
+  grad.appendChild(s1);grad.appendChild(s2);defs.appendChild(grad);svg.appendChild(defs);
+  if(pts.length>1){
+    const aD='M'+pts[0].x+','+(PAD.t+iH)+' '+pts.map(p=>`L${p.x},${p.y}`).join(' ')+` L${pts[pts.length-1].x},${PAD.t+iH} Z`;
+    const area=document.createElementNS(ns,'path');
+    area.setAttribute('d',aD);area.setAttribute('fill','url(#emoGrad)');
+    svg.appendChild(area);
+    const lD='M'+pts.map(p=>`${p.x},${p.y}`).join(' L');
+    const lpath=document.createElementNS(ns,'path');
+    lpath.setAttribute('d',lD);lpath.setAttribute('fill','none');
+    lpath.setAttribute('stroke','var(--pu)');lpath.setAttribute('stroke-width','2');
+    lpath.setAttribute('stroke-linejoin','round');lpath.setAttribute('stroke-linecap','round');
+    svg.appendChild(lpath);
+  }
+  pts.forEach((p,i)=>{
+    const circle=document.createElementNS(ns,'circle');
+    circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);
+    circle.setAttribute('r','4');circle.setAttribute('fill','var(--pu)');
+    circle.setAttribute('stroke','var(--surf)');circle.setAttribute('stroke-width','2');
+    svg.appendChild(circle);
+    const em=document.createElementNS(ns,'text');
+    em.setAttribute('x',p.x);em.setAttribute('y',p.y-8);
+    em.setAttribute('text-anchor','middle');em.setAttribute('font-size','11');
+    em.textContent=moodIcon(p.e.mood);
+    svg.appendChild(em);
+    if(pts.length<=8||i%Math.ceil(pts.length/6)===0){
+      const t=p.e.ts?new Date(p.e.ts).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}):'';
+      const xt=document.createElementNS(ns,'text');
+      xt.setAttribute('x',p.x);xt.setAttribute('y',H-PAD.b+14);
+      xt.setAttribute('text-anchor','middle');xt.setAttribute('font-size','9');
+      xt.setAttribute('fill','var(--tx3)');xt.textContent=t;
+      svg.appendChild(xt);
+    }
+  });
+  svgWrap.appendChild(svg);
+}
+
+// ════════════════════════════════
+// 4-2: 채팅 내보내기
+// ════════════════════════════════
+function exportChat(){
+  if(!chatHistory||!chatHistory.length){toast('내보낼 대화가 없어요','err');return;}
+  const lines=[];
+  lines.push('# 해영이와의 대화');
+  lines.push('내보낸 시각: '+new Date().toLocaleString('ko-KR'));
+  lines.push('');
+  lines.push('---');
+  lines.push('');
+  chatHistory.forEach(msg=>{
+    if(msg.role==='system') return;
+    const ts=msg.ts?new Date(msg.ts).toLocaleString('ko-KR'):'';
+    if(msg.role==='user'){
+      lines.push('**[현수]** '+ts);
+      lines.push(msg.content||'');
+    } else {
+      const parsed=parseAiResponse(msg.content||'');
+      lines.push('**[해영]** '+ts);
+      if(parsed.dialogue) lines.push(parsed.dialogue);
+      if(parsed.narrator){lines.push('');lines.push('*'+parsed.narrator+'*');}
+    }
+    lines.push('');
+  });
+  const blob=new Blob([lines.join('\n')],{type:'text/markdown;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const fname='해영이_대화_'+new Date().toLocaleDateString('ko-KR').replace(/\. /g,'-').replace('.','')+ '.md';
+  a.href=url; a.download=fname; a.click();
+  URL.revokeObjectURL(url);
+  toast('📤 대화 내보내기 완료');
+}
+
+function toggleBookmark(btn, row){
+  const ts=row.dataset.ts||row.dataset.rawText?.slice(0,30)||Date.now().toString();
+  const raw=row.dataset.rawText||'';
+  if(!DB.bookmarks) DB.bookmarks=[];
+  const idx=DB.bookmarks.findIndex(b=>b.ts===ts);
+  if(idx>=0){
+    DB.bookmarks.splice(idx,1);
+    btn.classList.remove('marked');
+    btn.title='북마크 추가';
+    toast('북마크 해제됐어요');
+  } else {
+    DB.bookmarks.unshift({ts, raw, savedAt:new Date().toISOString()});
+    btn.classList.add('marked');
+    btn.title='북마크 해제';
+    toast('⭐ 북마크됐어요');
+  }
+  markDirty();
+  saveAll(true);
+}
+
+function renderBookmarks(){
+  const list=document.getElementById('bkmk-list');
+  const empty=document.getElementById('bkmk-empty');
+  if(!list) return;
+  list.innerHTML='';
+  const bkmks=DB.bookmarks||[];
+  if(!bkmks.length){
+    if(empty) empty.style.display='';
+    return;
+  }
+  if(empty) empty.style.display='none';
+  bkmks.forEach((b,i)=>{
+    const parsed=parseAiResponse(b.raw||'');
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px';
+
+    // 날짜
+    const dateEl=document.createElement('div');
+    dateEl.style.cssText='font-size:10.5px;color:var(--tx3)';
+    dateEl.textContent=b.savedAt?new Date(b.savedAt).toLocaleString('ko-KR'):'';
+    card.appendChild(dateEl);
+
+    // 대사
+    if(parsed.dialogue){
+      const d=document.createElement('div');
+      d.style.cssText='font-size:13px;color:var(--tx);line-height:1.75;white-space:pre-wrap;word-break:break-word';
+      const lines=parsed.dialogue.split('\n');
+      lines.forEach((line,li)=>{
+        d.appendChild(renderDialogueLine(line));
+        if(li<lines.length-1) d.appendChild(document.createElement('br'));
+      });
+      card.appendChild(d);
+    }
+
+    // 나레이터
+    if(parsed.narrator){
+      const n=document.createElement('div');
+      n.style.cssText='font-size:12px;color:var(--tx2);font-style:italic;border-left:3px solid var(--pu);padding-left:10px;line-height:1.7;white-space:pre-wrap;word-break:break-word';
+      n.textContent=parsed.narrator;
+      card.appendChild(n);
+    }
+
+    // 삭제 버튼
+    const del=document.createElement('button');
+    del.textContent='북마크 해제';
+    del.style.cssText='align-self:flex-end;background:var(--surf2);border:1px solid var(--bdr2);border-radius:8px;padding:4px 12px;font-size:11px;color:var(--tx3);cursor:pointer;font-family:inherit';
+    del.onclick=()=>{
+      DB.bookmarks.splice(i,1);
+      markDirty(); saveAll(true);
+      renderBookmarks();
+    };
+    card.appendChild(del);
+    list.appendChild(card);
+  });
+}
+
+
+// ════════════════════════════════
+// G: 토큰 사용량 추정
+// ════════════════════════════════
+const TOKEN_STATS_KEY='hdb_token_stats';
+
+function estimateTokens(text){
+  const str=String(text||'');
+  const korean=(str.match(/[\uAC00-\uD7AF]/g)||[]).length;
+  const others=str.length-korean;
+  return Math.ceil(korean*0.7+others*0.4);
+}
+function loadTokenStats(){
+  try{return JSON.parse(localStorage.getItem(TOKEN_STATS_KEY)||'{}');}
+  catch(_){return {};}
+}
+function saveTokenStats(stats){
+  localStorage.setItem(TOKEN_STATS_KEY,JSON.stringify(stats));
+}
+function recordTokenUsage(promptText,responseText){
+  const stats=loadTokenStats();
+  const today=new Date().toISOString().slice(0,10);
+  if(!stats[today]) stats[today]={reqCount:0,inputTokens:0,outputTokens:0};
+  stats[today].reqCount++;
+  stats[today].inputTokens+=estimateTokens(promptText);
+  stats[today].outputTokens+=estimateTokens(responseText);
+  const keys=Object.keys(stats).sort();
+  if(keys.length>30) keys.slice(0,-30).forEach(k=>delete stats[k]);
+  saveTokenStats(stats);
+}
+function updateTokenStats(){
+  const el=document.getElementById('token-stats');
+  if(!el) return;
+  const stats=loadTokenStats();
+  const today=new Date().toISOString().slice(0,10);
+  const td=stats[today]||{reqCount:0,inputTokens:0,outputTokens:0};
+  const allKeys=Object.keys(stats);
+  const totalReq=allKeys.reduce((s,k)=>s+(stats[k].reqCount||0),0);
+  const totalIn=allKeys.reduce((s,k)=>s+(stats[k].inputTokens||0),0);
+  const totalOut=allKeys.reduce((s,k)=>s+(stats[k].outputTokens||0),0);
+  const costIn=(totalIn/1_000_000)*0.80;
+  const costOut=(totalOut/1_000_000)*4.00;
+  el.innerHTML=`<div style="margin-bottom:6px;font-weight:600;color:var(--tx)">오늘 (${today})</div>`+
+    `요청 <b>${td.reqCount}회</b> &nbsp;|&nbsp; 입력 ~<b>${td.inputTokens.toLocaleString()}</b>토큰 &nbsp;|&nbsp; 출력 ~<b>${td.outputTokens.toLocaleString()}</b>토큰`+
+    `<div style="margin:8px 0 4px;font-weight:600;color:var(--tx)">누적 전체</div>`+
+    `요청 <b>${totalReq}회</b> &nbsp;|&nbsp; 입력 ~<b>${totalIn.toLocaleString()}</b>토큰 &nbsp;|&nbsp; 출력 ~<b>${totalOut.toLocaleString()}</b>토큰`+
+    `<div style="margin-top:6px;color:var(--tx3)">Claude API 비용 추정: ~$${(costIn+costOut).toFixed(4)} USD</div>`;
+}
+function resetTokenStats(){
+  if(!confirm('토큰 사용량 기록을 초기화할까요?')) return;
+  localStorage.removeItem(TOKEN_STATS_KEY);
+  updateTokenStats();
+  toast('토큰 사용량 초기화됐어요');
+}
+
 let _tt;
 function toast(msg,type='default',ms=2500){
   const t=document.getElementById('toast');
@@ -16001,8 +16790,20 @@ function toast(msg,type='default',ms=2500){
 // ════════════════════════════════
 // 자동 저장
 // ════════════════════════════════
-setInterval(()=>{if(dirty)saveAll(true);},30000);
-window.addEventListener('beforeunload',()=>{if(dirty)saveAll();});
+setInterval(()=>{
+  if(!dirty) return;
+  saveAll(true);
+  if(localStorage.getItem('gd_auto')==='1' && gdLoadTok()) gdPush(true);
+},30000);
+window.addEventListener('beforeunload',()=>{if(dirty)saveAll(true);});
+// 1-1: Ctrl+S 단축키
+document.addEventListener('keydown',(e)=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){
+    e.preventDefault();
+    saveAll();
+    if(gdLoadTok()) gdPush(false);
+  }
+});
 
 init();
 </script>
