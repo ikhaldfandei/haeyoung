@@ -1001,6 +1001,57 @@ const LS_BACKUP_KEY='hdb_backup';
 const LS_META_KEY='hdb_meta';
 
 // ════════════════════════════════
+// IndexedDB 저장소 (용량 제한 없음)
+// localStorage quota 오류 방지용
+// ════════════════════════════════
+const HDB_IDB = {
+  db: null,
+  IDB_NAME: 'HaeyoungDB',
+  IDB_VER: 1,
+  STORE: 'appdata',
+  init() {
+    return new Promise((res, rej) => {
+      if (this.db) { res(); return; }
+      const r = indexedDB.open(this.IDB_NAME, this.IDB_VER);
+      r.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this.STORE))
+          db.createObjectStore(this.STORE, { keyPath: 'key' });
+      };
+      r.onsuccess = e => { this.db = e.target.result; res(); };
+      r.onerror = e => { console.error('HDB IDB 초기화 실패:', e); rej(e); };
+    });
+  },
+  async set(key, value) {
+    await this.init();
+    return new Promise((res, rej) => {
+      const tx = this.db.transaction(this.STORE, 'readwrite');
+      const req = tx.objectStore(this.STORE).put({ key, value, ts: new Date().toISOString() });
+      req.onsuccess = () => res();
+      req.onerror = rej;
+    });
+  },
+  async get(key) {
+    await this.init();
+    return new Promise((res, rej) => {
+      const tx = this.db.transaction(this.STORE, 'readonly');
+      const req = tx.objectStore(this.STORE).get(key);
+      req.onsuccess = e => res(e.target.result ? e.target.result.value : null);
+      req.onerror = rej;
+    });
+  },
+  async del(key) {
+    await this.init();
+    return new Promise((res, rej) => {
+      const tx = this.db.transaction(this.STORE, 'readwrite');
+      const req = tx.objectStore(this.STORE).delete(key);
+      req.onsuccess = () => res();
+      req.onerror = rej;
+    });
+  }
+};
+
+// ════════════════════════════════
 // 전생 기본 데이터
 // ════════════════════════════════
 const DEF_LIVES = [
@@ -14696,9 +14747,9 @@ const THEME_LIST = [
 // ════════════════════════════════
 // 초기화
 // ════════════════════════════════
-function init(){
+async function init(){
   _isBooting = true;
-  loadFromLS();
+  await loadFromIDB();
   if(!DB.memories || DB.memories.length === 0) {
     DB.memories = DEFAULT_MEMORIES;
   }
@@ -14993,9 +15044,16 @@ function bytesToKB(n){return Math.max(1,Math.round((n||0)/1024));}
 function getLocalBytes(key){const v=localStorage.getItem(key)||'';return new Blob([v]).size;}
 function writeLsMeta(patch){let meta={};try{meta=JSON.parse(localStorage.getItem(LS_META_KEY)||'{}')||{};}catch(_){meta={};}meta={...meta,...patch};localStorage.setItem(LS_META_KEY,JSON.stringify(meta));return meta;}
 function saveLocalCopies(payload){
-  localStorage.setItem(LS_MAIN_KEY,payload);
-  localStorage.setItem(LS_BACKUP_KEY,payload);
-  writeLsMeta({mainSavedAt:new Date().toISOString(),backupSavedAt:new Date().toISOString()});
+  const now=new Date().toISOString();
+  // IndexedDB 우선 저장 (용량 제한 없음, 비동기)
+  HDB_IDB.set('hdb_main', payload).catch(e=>console.warn('IDB 저장 실패:',e));
+  // localStorage 폴백 (실패해도 무시)
+  let mainOk=false, backupOk=false;
+  try{ localStorage.setItem(LS_MAIN_KEY,payload); mainOk=true; }
+  catch(e){ console.warn('localStorage main 저장 실패(용량 초과 — IDB로 대체됨):',e); }
+  try{ localStorage.setItem(LS_BACKUP_KEY,payload); backupOk=true; }
+  catch(e){ /* 무시 — IDB가 있으니까 */ }
+  writeLsMeta({mainSavedAt:now, backupSavedAt:backupOk?now:undefined});
 }
 function refreshLocalBackupUI(){
   let meta={};
@@ -15168,9 +15226,11 @@ async function gdPull(){
     const d=typeof text==='string'?JSON.parse(text):text;
     DB={...DB,...d};
     const payload=JSON.stringify(DB);
-    saveLocalCopies(payload);
     const nowIso=new Date().toISOString();
-    localStorage.setItem('gd_last',nowIso);
+    // IDB + localStorage 저장 (quota 실패해도 진행)
+    HDB_IDB.set('hdb_main', payload).catch(e=>console.warn('IDB 저장 실패:',e));
+    try{ saveLocalCopies(payload); } catch(e){ console.warn('로컬 저장 실패(IDB로 대체):',e); }
+    try{ localStorage.setItem('gd_last',nowIso); } catch(_){}
     gdBar('✓ Drive 불러오기 완료 — 새로고침합니다','ok');
     gdLog(`Drive 불러오기 완료 — ${fmtTs(nowIso)}`);
     toast('✓ Drive 불러오기 완료 — 새로고침합니다','ok',1200);
@@ -15245,11 +15305,33 @@ function saveAll(silent=false){
   }
 }
 
+async function loadFromIDB(){
+  // IndexedDB에서 먼저 읽기 시도
+  try{
+    const val = await HDB_IDB.get('hdb_main');
+    if(val){
+      const s=JSON.parse(val); DB={...DB,...s};
+      _applyDBtoUI();
+      return true;
+    }
+  }catch(e){ console.warn('IDB 읽기 실패, localStorage 폴백:',e); }
+  // IDB 실패 시 localStorage 폴백
+  loadFromLS();
+  return false;
+}
+
 function loadFromLS(){
   const raw=localStorage.getItem(LS_MAIN_KEY)||localStorage.getItem(LS_BACKUP_KEY)||localStorage.getItem('hdb'); if(!raw)return;
   try{
     const s=JSON.parse(raw); DB={...DB,...s};
+    _applyDBtoUI();
+  }catch(e){console.error('불러오기 실패:',e);}
+}
+
+function _applyDBtoUI(){
+  try{
     const hy=DB.haeyoung||{}, hs=DB.hyunsoo||{};
+    const sv=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.value=v;};
     const sv=(id,v)=>{const el=document.getElementById(id);if(el&&v!==undefined)el.value=v;};
     // 해영
     sv('hy-name',hy.name);sv('hy-basic',hy.basic);sv('hy-job',hy.job);sv('hy-look',hy.look);sv('hy-nick',hy.nick);sv('hy-pen',hy.pen);
@@ -15277,7 +15359,7 @@ function loadFromLS(){
       .map(normalizeChatEntry)
       .filter(Boolean)
       .slice(-CHAT_HISTORY_LIMIT);
-  }catch(e){console.error('불러오기 실패:',e);}
+  }catch(e){console.error('UI 반영 실패:',e);}
 }
 
 
@@ -16539,7 +16621,7 @@ function exportData(){
 function importData(inp){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();r.onload=e=>{
-    try{const d=JSON.parse(e.target.result);if(!confirm('현재 데이터를 덮어쓸까요?'))return;DB=d;saveLocalCopies(JSON.stringify(DB));updateStorageInfo();location.reload();}
+    try{const d=JSON.parse(e.target.result);if(!confirm('현재 데이터를 덮어쓸까요?'))return;DB=d;const p=JSON.stringify(DB);HDB_IDB.set('hdb_main',p).catch(e=>console.warn('IDB 저장 실패:',e));saveLocalCopies(p);updateStorageInfo();location.reload();}
     catch(err){toast('파일 읽기 실패: '+err.message,'err');}
   };r.readAsText(f);
 }
